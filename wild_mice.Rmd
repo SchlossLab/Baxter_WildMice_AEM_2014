@@ -1,7 +1,7 @@
 ---
-title: "wild_mice"
-author: "Patrick D. Schloss"
-date: "September 12, 2014"
+title: "Intra- and inter-individual variation masks inter-species variation in the microbiota of sympatric *Peromyscus* populations"
+author: "Nielson T. Baxter & Patrick D. Schloss"
+date: ""
 output: html_document
 ---
 
