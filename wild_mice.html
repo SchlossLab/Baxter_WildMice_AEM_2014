@@ -59,6 +59,18 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
+<p>This is a digital notebook to accompany the paper titled, “Intra- and inter-individual variation masks inter-species variation in the microbiota of sympatric Peromyscus populations” that will be published in <em>Applied &amp; Environmental Microbiology</em>. It was written in <a href>R markdown</a> and converted to html using the R knitr package. This enables us to embed the results of our analyses directly into the text to allow for a completely reproducible data analysis pipeline. A <a href>github repository is available</a> where you can pull down your own version of the notebook to modify our analysis or adapt it to your analysis.</p>
+<p>This document was generated using <a href="http://www.mothur.org/wiki">mothur v.1.33</a> and the <a href>R package</a>:</p>
+<pre class="r"><code>install.packages(c(&quot;randomForest&quot;, &quot;maps&quot;, &quot;vegan&quot;, &quot;date&quot;, &quot;knitr&quot;))
+library(&quot;randomForest&quot;, verbose=FALSE)
+library(&quot;maps&quot;, quietly=TRUE)
+library(&quot;vegan&quot;, quietly=TRUE)
+library(&quot;date&quot;, quietly=TRUE)
+library(&quot;knitr&quot;, quietly=TRUE)
+sessionInfo()</code></pre>
+<p>To convert the R markdown to html (or any other format), you’ll also need to install the <a href>SRA tools package</a> and have a live internet connection. You can make the conversion using the <a href>knitr package</a> from within R:</p>
+<pre class="r"><code>knitr(&quot;wild_mice.Rmd&quot;)</code></pre>
+<p>The goal of this document is to give a blow-by-blow accounting for how the analysis was done. Later in the document, we reproduce the text of the Results section of the paper where all of the numbers in the text are reproduced live.</p>
 </div>
 <div id="data-curation" class="section level2">
 <h2>Data curation</h2>
