@@ -1,0 +1,195 @@
+---
+title: "wild_mice"
+author: "Patrick D. Schloss"
+date: "September 12, 2014"
+output: html_document
+---
+
+## Introduction
+## Data curation
+### Getting data out of the SRA
+
+```{r, engine='bash', eval=FALSE}
+mkdir wild_mice
+cd wild_mice
+
+#download sra files
+wget -r ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByStudy/sra/SRP/SRP044/SRP044050/*
+mv ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByStudy/sra/SRP/SRP044/SRP044050/SRR1506*/*sra ./
+rm -rf ftp-trace.ncbi.nlm.nih.gov
+
+for SRA in *.sra
+do
+fastq-dump $SRA --split-files
+done
+
+#download run info metadata files
+wget -O ./SRP044050_info.csv 'http://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?save=efetch&db=sra&rettype=runinfo&term=SRP044050'
+}
+```
+
+
+```{r, eval=FALSE}
+run.info <- read.csv(file="SRP044050_info.csv", header=T, stringsAsFactors=F)
+run.16S.info <- run.info[grepl("16S", run.info$LibraryName),]
+run.18S.info <- run.info[grepl("18S", run.info$LibraryName),]
+
+files.16S <- cbind(run.16S.info$LibraryName, paste0(run.16S.info$Run, "_1.fastq"), paste0(run.16S.info$Run, "_2.fastq"))
+write.table(files.16S, file="wild_mice.16S.files", quote=F, row.names=F, col.names=F, sep="\t")
+
+files.18S <- cbind(run.18S.info$LibraryName, paste0(run.18S.info$Run, "_1.fastq"), paste0(run.18S.info$Run, "_2.fastq"))
+write.table(files.18S, file="wild_mice.18S.files", quote=F, row.names=F, col.names=F, sep="\t")
+```
+
+
+### Processing 16S and 18S rRNA gene sequence data in mothur
+
+```{r, engine='bash', eval=FALSE}
+mothur "#make.contigs(file=wild_mice.16S.files, processors=8)"
+mothur "#make.contigs(file=wild_mice.18S.files, processors=8)"
+```
+
+```{r, engine='bash', eval=FALSE}
+mkdir sra_files
+mv *.sra *.fastq SRP044050_info.csv sra_files
+
+wget http://www.mothur.org/w/images/9/98/Silva.bacteria.zip
+unzip *zip
+mv silva.bacteria/silva.bacteria.fasta ./
+rm -rf silva.bacteria __MACOSX Silva.bacteria.zip
+
+mothur "#pcr.seqs(fasta=silva.bacteria.fasta, start=11894, end=25319, keepdots=F, processors=8)"
+mv silva.bacteria.pcr.fasta silva.v4.fasta
+
+
+wget http://www.mothur.org/w/images/5/59/Trainset9_032012.pds.zip
+unzip *zip
+rm Trainset9_032012.pds.zip
+
+wget http://www.mothur.org/WildPeromyscusStudy/v4.eukarya.tgz
+tar xvzf v4.eukarya.tgz
+rm v4.eukarya.tgz
+```
+
+
+```{r, engine='bash', eval=FALSE}
+mothur "#unique.seqs(fasta=wild_mice.16S.trim.contigs.fasta);
+summary.seqs(fasta=current, processors=8);
+screen.seqs(fasta=current, name=current, group=wild_mice.16S.contigs.groups, summary=current, maxambig=0, maxhomop=8, maxlength=275);
+count.seqs(name=current, group=current);
+align.seqs(fasta=current, reference=silva.v4.fasta);
+summary.seqs(count=current);
+screen.seqs(fasta=current, count=current, start=1968, end=11550);
+filter.seqs(vertical=T, trump=.);
+unique.seqs(fasta=current, count=current);
+pre.cluster(fasta=current, count=current, diffs=2);
+chimera.uchime(fasta=current, count=current, dereplicate=t);
+remove.seqs(fasta=current, accnos=current);
+summary.seqs(fasta=current, count=current);
+classify.seqs(fasta=current, count=current, reference=trainset9_032012.pds.fasta, taxonomy=trainset9_032012.pds.tax, cutoff=80);
+remove.lineage(fasta=current, count=current, taxonomy=current, taxon=Chloroplast-Mitochondria-unknown-Archaea-Eukaryota);
+
+cluster.split(fasta=current, count=current, taxonomy=current, splitmethod=classify, taxlevel=4, cutoff=0.15);
+make.shared(list=current, count=current, label=0.03);
+classify.otu(list=current, count=current, taxonomy=current, label=0.03);
+
+phylotype(taxonomy=current);
+make.shared(list=current, count=current, label=1);
+classify.otu(list=current, taxonomy=current, label=1);
+
+dist.seqs(fasta=current, output=lt);
+clearcut();
+
+system(mkdir 16S.analysis);
+system(mv *.16S.* 16S.analysis);"
+```
+
+
+```{r, engine='bash', eval=FALSE}
+ mothur "#screen.seqs(fasta=wild_mice.18S.trim.contigs.fasta, group=wild_mice.18S.contigs.groups, contigsreport=wild_mice.18S.contigs.report, maxambig=0, maxlength=450, minoverlap=20, maxhomop=8, processors=8);
+unique.seqs(fasta=current);
+count.seqs(name=current, group=current);
+align.seqs(fasta=current, reference=silva.eukarya.fasta);
+summary.seqs(count=current);
+screen.seqs(fasta=current, count=current, start=13876, end=22449);
+filter.seqs(vertical=T, trump=.);
+unique.seqs(fasta=current, count=current);
+pre.cluster(fasta=current, count=current, diffs=2);
+chimera.uchime(fasta=current, count=current, dereplicate=t);
+remove.seqs(fasta=current, accnos=current);
+summary.seqs(fasta=current, count=current);
+
+classify.seqs(fasta=current, count=current, reference=v4.eukarya.fasta, taxonomy=v4.eukarya.tax, cutoff=80);
+remove.lineage(fasta=current, count=current, taxonomy=current, taxon=Mammalia-Amoebozoa-Cryptophyceae-Excavata-SAR-Nematoda-Rotifera-Tardigrada-Archaeorhizomyces-LKM11-LKM15-uncultured-Chlorophyta-Eukaryota;unclassified;-Archaeplastida;unclassified-Eukaryota;Opisthokonta;Fungi;unclassified;-Opisthokonta;unclassified);
+phylotype(taxonomy=current);
+make.shared(list=current, count=current, label=1);
+classify.otu(list=current, count=current, taxonomy=current, label=1);
+
+system(mkdir 18S.analysis);
+system(mv *.18S.* 18S.analysis);"
+```
+
+## Data analysis
+
+### Field capture of Peromyscus spp.
+
+```{r}
+north_south <- c("DD"=1, "CC"=2, "BB"=3, "AA"=4, "A"=5, "B"=6, "C"=7, "D"=8, "E"=9, "F"=10, "G"=11, "H"=12, "I"=13, "J"=14, "K"=15, "L"=16, "M"=17, "N"=18, "O"=19, "P"=20)
+
+grid <- matrix(rep(0, 20*20), nrow=20)
+rownames(grid) <- 1:20
+colnames(grid) <- 1:20
+
+pl_grid <- matrix(rep(0, 20*20), nrow=20)
+rownames(pl_grid) <- 1:20
+colnames(pl_grid) <- 1:20
+
+pmg_grid <- matrix(rep(0, 20*20), nrow=20)
+rownames(pmg_grid) <- 1:20
+colnames(pmg_grid) <- 1:20
+
+md <- read.table(file="wild.metadata.txt", header=T)
+rownames(md) <- md$Group
+
+counts <- table(md$SP)
+
+et.sp <- table(md$ET, md$SP)
+apply(et.sp>0, 2, sum)
+# PL PMG 
+# 26  23 
+
+sum(table(md$ET) > 1)
+#[1] 29 animals captured multiple times
+
+
+
+
+row <- north_south[gsub("(\\D+)\\d+", "\\1", md$Station)]
+column <- as.numeric(gsub("\\D+(\\d+)", "\\1", md$Station))
+nsamples <- length(row)
+
+for(i in 1:nsamples){
+	grid[row[i],column[i]] <- grid[row[i],column[i]]+1
+	if(md$SP[i] == "PL"){
+		pl_grid[row[i],column[i]] <- pl_grid[row[i],column[i]]+1
+	} else {
+		pmg_grid[row[i],column[i]] <- pmg_grid[row[i],column[i]]+1
+	}
+}
+
+pmg_grid
+
+```
+
+
+### Host species does not affect microbiota structure
+ 
+### Effects of host physiology on diversity and richness
+ 
+### Location of sampling was not associated with variation in microbiota
+ 
+### Diet was not associated with variation in microbiota
+ 
+### A transient microbiota
+ 
+## Conclusion
