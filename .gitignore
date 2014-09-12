@@ -2,3 +2,4 @@
 *.analysis/
 .Rproj.user
 *.Rproj
+mothur*logfile
