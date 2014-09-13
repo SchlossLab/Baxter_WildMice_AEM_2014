@@ -61,12 +61,17 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 <h2>Introduction</h2>
 <p>This is a digital notebook to accompany the paper titled, “Intra- and inter-individual variation masks inter-species variation in the microbiota of sympatric Peromyscus populations” that will be published in <em>Applied &amp; Environmental Microbiology</em>. It was written in <a href>R markdown</a> and converted to html using the R knitr package. This enables us to embed the results of our analyses directly into the text to allow for a completely reproducible data analysis pipeline. A <a href>github repository is available</a> where you can pull down your own version of the notebook to modify our analysis or adapt it to your analysis.</p>
 <p>This document was generated using <a href="http://www.mothur.org/wiki">mothur v.1.33</a> and the <a href>R package</a>:</p>
-<pre class="r"><code>install.packages(c(&quot;randomForest&quot;, &quot;maps&quot;, &quot;vegan&quot;, &quot;date&quot;, &quot;knitr&quot;))
+<pre class="r"><code>deps = c(&quot;randomForest&quot;, &quot;maps&quot;, &quot;vegan&quot;, &quot;date&quot;, &quot;knitr&quot;);
+
+for (dep in deps){
+  if (dep %in% installed.packages()[,&quot;Package&quot;] == FALSE){
+    install.packages(as.character(dep), quiet=TRUE);
+  }
+  library(dep, verbose=FALSE, character.only=TRUE)
+
+}
 library(&quot;randomForest&quot;, verbose=FALSE)
-library(&quot;maps&quot;, quietly=TRUE)
-library(&quot;vegan&quot;, quietly=TRUE)
-library(&quot;date&quot;, quietly=TRUE)
-library(&quot;knitr&quot;, quietly=TRUE)
+
 sessionInfo()</code></pre>
 <p>To convert the R markdown to html (or any other format), you’ll also need to install the <a href>SRA tools package</a> and have a live internet connection. You can make the conversion using the <a href>knitr package</a> from within R:</p>
 <pre class="r"><code>knitr(&quot;wild_mice.Rmd&quot;)</code></pre>
@@ -205,7 +210,31 @@ wild_mice.18S.trim.contigs.good.unique.good.filter.unique.precluster.pick.eukary
 <p>What follows is the exact text from the Results section with the R code that was used to generate the numbers (including P-values) and all figures.</p>
 <div id="field-capture-of-peromyscus-spp." class="section level3">
 <h3>Field capture of Peromyscus spp.</h3>
-<pre class="r"><code>north_south &lt;- c(&quot;DD&quot;=1, &quot;CC&quot;=2, &quot;BB&quot;=3, &quot;AA&quot;=4, &quot;A&quot;=5, &quot;B&quot;=6, &quot;C&quot;=7, &quot;D&quot;=8, &quot;E&quot;=9, &quot;F&quot;=10, &quot;G&quot;=11, &quot;H&quot;=12, &quot;I&quot;=13, &quot;J&quot;=14, &quot;K&quot;=15, &quot;L&quot;=16, &quot;M&quot;=17, &quot;N&quot;=18, &quot;O&quot;=19, &quot;P&quot;=20)
+<pre class="r"><code>md &lt;- read.table(file=&quot;wild.metadata.txt&quot;, header=T)
+rownames(md) &lt;- md$Group
+md$Date &lt;- sub(&quot;_(\\d)$&quot;, &quot;_0\\1&quot;, md$Date)
+
+months &lt;- format(ISOdate(2004,1:12,1),&quot;%B&quot;)
+names(months) &lt;- as.character(1:12)
+
+start &lt;- sort(md$Date)[1]
+start &lt;- unlist(strsplit(start, &quot;_&quot;))
+start &lt;- paste(months[start[1]], start[2])
+
+end &lt;- sort(md$Date)[nrow(md)]
+end &lt;- unlist(strsplit(end, &quot;_&quot;))
+end &lt;- paste(months[end[1]], end[2])
+
+eartag.species &lt;- table(md$ET, md$SP)
+samples.per.species &lt;- apply(eartag.species, 2, sum)
+indiv.per.species &lt;- apply(eartag.species&gt;0, 2, sum)
+
+indiv.multiple &lt;- sum(table(md$ET) &gt; 1)
+#[1] 29 animals captured multiple times
+
+
+
+north_south &lt;- c(&quot;DD&quot;=1, &quot;CC&quot;=2, &quot;BB&quot;=3, &quot;AA&quot;=4, &quot;A&quot;=5, &quot;B&quot;=6, &quot;C&quot;=7, &quot;D&quot;=8, &quot;E&quot;=9, &quot;F&quot;=10, &quot;G&quot;=11, &quot;H&quot;=12, &quot;I&quot;=13, &quot;J&quot;=14, &quot;K&quot;=15, &quot;L&quot;=16, &quot;M&quot;=17, &quot;N&quot;=18, &quot;O&quot;=19, &quot;P&quot;=20)
 
 grid &lt;- matrix(rep(0, 20*20), nrow=20)
 rownames(grid) &lt;- 1:20
@@ -219,21 +248,9 @@ pmg_grid &lt;- matrix(rep(0, 20*20), nrow=20)
 rownames(pmg_grid) &lt;- 1:20
 colnames(pmg_grid) &lt;- 1:20
 
-md &lt;- read.table(file=&quot;wild.metadata.txt&quot;, header=T)
-rownames(md) &lt;- md$Group
+
 
 counts &lt;- table(md$SP)
-
-et.sp &lt;- table(md$ET, md$SP)
-apply(et.sp&gt;0, 2, sum)</code></pre>
-<pre><code>##  PL PMG 
-##  26  23</code></pre>
-<pre class="r"><code># PL PMG 
-# 26  23 
-
-sum(table(md$ET) &gt; 1)</code></pre>
-<pre><code>## [1] 29</code></pre>
-<pre class="r"><code>#[1] 29 animals captured multiple times
 
 
 

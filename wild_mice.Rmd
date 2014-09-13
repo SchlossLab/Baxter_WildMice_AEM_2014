@@ -11,12 +11,18 @@ This is a digital notebook to accompany the paper titled, "Intra- and inter-indi
 This document was generated using [mothur v.1.33](http://www.mothur.org/wiki) and the [R package]():
 
 ```{r, eval=FALSE}
-install.packages(c("randomForest", "maps", "vegan", "date", "knitr"))
+
+deps = c("randomForest", "maps", "vegan", "date", "knitr");
+
+for (dep in deps){
+  if (dep %in% installed.packages()[,"Package"] == FALSE){
+    install.packages(as.character(dep), quiet=TRUE);
+  }
+  library(dep, verbose=FALSE, character.only=TRUE)
+
+}
 library("randomForest", verbose=FALSE)
-library("maps", quietly=TRUE)
-library("vegan", quietly=TRUE)
-library("date", quietly=TRUE)
-library("knitr", quietly=TRUE)
+
 sessionInfo()
 ```
 
@@ -213,6 +219,30 @@ What follows is the exact text from the Results section with the R code that was
 ### Field capture of Peromyscus spp.
 
 ```{r}
+md <- read.table(file="wild.metadata.txt", header=T)
+rownames(md) <- md$Group
+md$Date <- sub("_(\\d)$", "_0\\1", md$Date)
+
+months <- format(ISOdate(2004,1:12,1),"%B")
+names(months) <- as.character(1:12)
+
+start <- sort(md$Date)[1]
+start <- unlist(strsplit(start, "_"))
+start <- paste(months[start[1]], start[2])
+
+end <- sort(md$Date)[nrow(md)]
+end <- unlist(strsplit(end, "_"))
+end <- paste(months[end[1]], end[2])
+
+eartag.species <- table(md$ET, md$SP)
+samples.per.species <- apply(eartag.species, 2, sum)
+indiv.per.species <- apply(eartag.species>0, 2, sum)
+
+indiv.multiple <- sum(table(md$ET) > 1)
+#[1] 29 animals captured multiple times
+
+
+
 north_south <- c("DD"=1, "CC"=2, "BB"=3, "AA"=4, "A"=5, "B"=6, "C"=7, "D"=8, "E"=9, "F"=10, "G"=11, "H"=12, "I"=13, "J"=14, "K"=15, "L"=16, "M"=17, "N"=18, "O"=19, "P"=20)
 
 grid <- matrix(rep(0, 20*20), nrow=20)
@@ -227,18 +257,9 @@ pmg_grid <- matrix(rep(0, 20*20), nrow=20)
 rownames(pmg_grid) <- 1:20
 colnames(pmg_grid) <- 1:20
 
-md <- read.table(file="wild.metadata.txt", header=T)
-rownames(md) <- md$Group
+
 
 counts <- table(md$SP)
-
-et.sp <- table(md$ET, md$SP)
-apply(et.sp>0, 2, sum)
-# PL PMG 
-# 26  23 
-
-sum(table(md$ET) > 1)
-#[1] 29 animals captured multiple times
 
 
 
@@ -259,7 +280,7 @@ for(i in 1:nsamples){
 pmg_grid
 
 ```
-Between May 25 and July 14, 2010 we used live traps to capture and release PL and PMG from sites within a 400 m by 400 m grid (20 m intervals) within Pigeon River State Forest in Cheboygan County, MI. Because animals were given ear tags at the initial capture event, we were able to document the animals that were captured multiple times. We obtained 58 fecal samples from 26 PL animals and 53 fecal samples from 23 PMG animals. Among the samples from animals captured multiple times (N=29 animals), the median distance between successive re-sampling events was 45 m (minimum=0 m, maximum=362 m). When we overlaid the species of Peromyscus on the sampling grid, we were unable to detect variation in the range of the mice supporting the notion that the habitats of these mice overlapped (Figures 1A and 1B).
+Between `r start` and `r end`, 2010 we used live traps to capture and release PL and PMG from sites within a 400 m by 400 m grid (20 m intervals) within Pigeon River State Forest in Cheboygan County, MI. Because animals were given ear tags at the initial capture event, we were able to document the animals that were captured multiple times. We obtained `r sum(samples.per.species["PL"])` fecal samples from `r indiv.per.species["PL"]` PL animals and `r sum(samples.per.species["PMG"])` fecal samples from `r sum(indiv.per.species["PMG"])` PMG animals. Among the samples from animals captured multiple times (N=`r indiv.multiple` animals), the median distance between successive re-sampling events was 45 m (minimum=0 m, maximum=362 m). When we overlaid the species of Peromyscus on the sampling grid, we were unable to detect variation in the range of the mice supporting the notion that the habitats of these mice overlapped (Figures 1A and 1B).
 
 
 ### Host species does not affect microbiota structure
