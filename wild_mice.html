@@ -262,6 +262,10 @@ rownames(distance.matrix) &lt;- md$Group
 colnames(distance.matrix) &lt;- md$Group
 distance.matrix &lt;- distance.matrix * 20  # the cells are on 20-m intervals
 
+# we'd like to keep a copy of the distance matrix around so that we can see
+# whether there are any geographic correlations with community similarity
+write(file = &quot;grid.dist&quot;, ncol(distance.matrix))
+write.table(distance.matrix, &quot;grid.dist&quot;, quote = F, col.names = F, append = T)
 
 # let's look at the samples collected from the same individuals first we
 # count the number of samples per each ear tag
