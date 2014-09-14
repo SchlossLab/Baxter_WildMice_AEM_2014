@@ -353,14 +353,20 @@ alpha <- alpha[alpha$method=="ave",]
 rownames(alpha) <- alpha$group
 alpha <- alpha[,-c(1,2,3)]
 
+
+
 sobs.anova <- summary(aov(rank(alpha$sobs) ~ md$SP*md$Sex + Error(md$ET)))
 summary(aov(rank(alpha$sobs) ~ md$SP*md$Sex + Error(md$ET)))
 
 shannon.anova <- summary(aov(rank(alpha$shannon) ~ md$SP*md$Sex + Error(md$ET)))
 summary(aov(rank(alpha$shannon) ~ md$SP*md$Sex + Error(md$ET)))
 
+
+dmm.fit <- read.table(file="16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.an.unique_list.0.03.subsample.0.03.dmm.mix.fit", header=T)
+n.dmms <- which.min(dmm.fit$Laplace)
+
 ```
-We compared the fecal communities between the two host species to test whether the genetic differences between the two animal species would translate into differences in their microbiotas. Using a variety of statistical tests, we were unable to detect a meaningful difference between the two species. First, there was not a significant difference in the richness (P=`r format(sobs.anova[[2]][[1]]$"Pr(>F)"[1], digits=2)`), Shannon diversity (P=`r format(shannon.anova[[2]][[1]]$"Pr(>F)"[1], digits=2)`), or phylogenetic diversity (P=0.95) between the two species of mice (Figure 2A). Second, there was not a significant difference in the community structures of the microbiota characterized from the two species (AMOVA; P~θ~=0.26; P~W~=0.33). Third, there was not a significant difference in the variation of their community structure within the microbiota characterized from the two species (HOMOVA; P~θ~=0.43; P~W~=0.33). Finally, when we attempted to fit the data to DMM models, there was no support for more than one community type. In each of these comparisons, the level of variation across mice within either species was considerable (Figure 2B).
+We compared the fecal communities between the two host species to test whether the genetic differences between the two animal species would translate into differences in their microbiotas. Using a variety of statistical tests, we were unable to detect a meaningful difference between the two species. First, there was not a significant difference in the richness (P=`r format(sobs.anova[[2]][[1]]$"Pr(>F)"[1], digits=2)`), Shannon diversity (P=`r format(shannon.anova[[2]][[1]]$"Pr(>F)"[1], digits=2)`), or phylogenetic diversity (P=0.95) between the two species of mice (Figure 2A). Second, there was not a significant difference in the community structures of the microbiota characterized from the two species (AMOVA; P~θ~=0.26; P~W~=0.33). Third, there was not a significant difference in the variation of their community structure within the microbiota characterized from the two species (HOMOVA; P~θ~=0.43; P~W~=0.33). Finally, when we attempted to fit the OTU abundance data to DMM models, there was no support for more than one (`r n.dmms`) community type. In each of these comparisons, the level of variation across mice within either species was considerable (Figure 2B).
 
 We observed two OTUs that were significantly different between the two species. These OTUs affiliated within the genus Barnesiella and unclassified members of the family Porphyromonadaceae (Figure 2C). Furthermore, among all of the OTUs, these provided the greatest mean decrease in accuracy (15.6 and 14.0, respectively) when we used the random forest machine-learning algorithm to distinguish between the Peromyscus species. For the random forest feature selection procedure, we observed an out of bag error rate of 31.5% suggesting that it was not possible to reliably use these OTUs to correctly classify the communities found in the two species of mice. Thus there was a lack of clear support for a differentiation in specific members of the Peromyscus species’ microbiotas that parallels that of their host species.
 
