@@ -3,3 +3,6 @@
 .Rproj.user
 *.Rproj
 mothur*logfile
+.RData
+.Rhistory
+
