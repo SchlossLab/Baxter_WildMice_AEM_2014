@@ -6,9 +6,9 @@ output: html_document
 ---
 
 ## Introduction
-This is a digital notebook to accompany the paper titled, "Intra- and inter-individual variation masks inter-species variation in the microbiota of sympatric Peromyscus populations" that will be published in *Applied & Environmental Microbiology*. It was written in [R markdown]() and converted to html using the R knitr package. This enables us to embed the results of our analyses directly into the text to allow for a completely reproducible data analysis pipeline. A [github repository is available]() where you can pull down your own version of the notebook to modify our analysis or adapt it to your analysis. 
+This is a digital notebook to accompany the paper titled, "Intra- and inter-individual variation masks inter-species variation in the microbiota of sympatric Peromyscus populations" that will be published in *Applied & Environmental Microbiology*. It was written in [R markdown](http://rmarkdown.rstudio.com) and converted to html using the R knitr package. This enables us to embed the results of our analyses directly into the text to allow for a completely reproducible data analysis pipeline. A [github repository is available](https://github.com/schlossLab/wild_mice) where you can pull down your own version of the notebook to modify our analysis or adapt it to your analysis. 
 
-This document was generated using [mothur v.1.33](http://www.mothur.org/wiki) and the [R package]():
+This document was generated using [mothur v.1.33](http://www.mothur.org/wiki) and [R](http://www.r-project.org):
 
 ```{r, eval=FALSE}
 
@@ -26,7 +26,7 @@ library("randomForest", verbose=FALSE)
 sessionInfo()
 ```
 
-To convert the R markdown to html (or any other format), you'll also need to install the [SRA tools package]() and have a live internet connection. You can make the conversion using the [knitr package]() from within R:
+To convert the R markdown to html (or any other format), you'll also need to install the [SRA tools package](http://www.ncbi.nlm.nih.gov/books/NBK158900/) and have a live internet connection. You can make the conversion using the [knitr package](http://yihui.name/knitr/) from within R:
 
 ```{r, eval=FALSE}
 knitr("wild_mice.Rmd")
@@ -72,7 +72,7 @@ rm v4.eukarya.tgz
 ```
 
 ### Getting data out of the SRA
-Now that we're into the `wild_mice` folder, we're ready to pull down the sequence data from NCBI's Short Read Archive (SRA). This is not a trivial process. The data is available in an html format on the [NCBI website](). It would be pretty tedious to pull down the 222 files individually. Let's not do that. Instead we'll use the command line `wget` function to pull the files down and then put the individual `*.sra` files into the top level of our `wild_mice` folder:
+Now that we're into the `wild_mice` folder, we're ready to pull down the sequence data from NCBI's Short Read Archive (SRA). This is not a trivial process. The data is available in an html format on the NCBI's [SRA website](http://www.ncbi.nlm.nih.gov/sra/?term=SRP044050). It would be pretty tedious to pull down the 222 files individually. Let's not do that. Instead we'll use the command line `wget` function to pull the files down and then put the individual `*.sra` files into the top level of our `wild_mice` folder:
 
 ```{r, engine='bash', eval=FALSE, tidy=TRUE}
 wget -r ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByStudy/sra/SRP/SRP044/SRP044050/*
@@ -112,7 +112,7 @@ write.table(files.18S, file="wild_mice.18S.files", quote=F, row.names=F, col.nam
 Now that we have `wild_mice.16S.files` and `wild_mice.18S.files` we are ready to assemble the reads into contigs.
 
 ### Processing 16S and 18S rRNA gene sequence data in mothur
-Using the deltaQ method described in the [Kozich et al. manuscript]() we will assemble the paired reads into contigs
+Using the deltaQ method described in the [Kozich et al. manuscript](http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3753973/) we will assemble the paired reads into contigs
 ```{r, engine='bash', eval=FALSE}
 mothur "#make.contigs(file=wild_mice.16S.files, processors=8)"
 mothur "#make.contigs(file=wild_mice.18S.files, processors=8)"
@@ -222,6 +222,8 @@ What follows is the exact text from the Results section with the R code that was
 md <- read.table(file="wild.metadata.txt", header=T)
 rownames(md) <- md$Group
 nsamples <- nrow(md)
+o <- order(rownames(md))
+md <- md[o,]
 
 md$Date <- sub("_(\\d)$", "_0\\1", md$Date)
 
@@ -347,13 +349,14 @@ mothur "#
 ```
 
 ```{r}
-#let's do some statistics...
 alpha <- read.table(file="16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.an.unique_list.0.03.subsample.groups.ave-std.summary", header=T)
 alpha <- alpha[alpha$method=="ave",]
-rownames(alpha) <- alpha$group
+rownames(alpha) <- gsub("_16S", "", alpha$group)
+o <- order(rownames(alpha))
+alpha <- alpha[o,]
 alpha <- alpha[,-c(1,2,3)]
 
-
+stopifnot(sum(rownames(md)!=rownames(alpha)) == 0)
 
 sobs.anova <- summary(aov(rank(alpha$sobs) ~ md$SP*md$Sex + Error(md$ET)))
 summary(aov(rank(alpha$sobs) ~ md$SP*md$Sex + Error(md$ET)))
@@ -362,11 +365,21 @@ shannon.anova <- summary(aov(rank(alpha$shannon) ~ md$SP*md$Sex + Error(md$ET)))
 summary(aov(rank(alpha$shannon) ~ md$SP*md$Sex + Error(md$ET)))
 
 
+pd <- read.table(file="16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.phylip.1.phylodiv.rarefaction", header=T, row.names=1)
+pd.final <- as.vector(pd["4463",])
+names(pd.final) <- gsub("^X(.*)_16S", "\\1", names(pd.final))
+o <- order(names(pd.final))
+pd.final <- pd.final[o]
+stopifnot(sum(names(pd.final) != rownames(md)) == 0)
+
+pd.anova <- summary(aov(rank(pd.final) ~ md$SP*md$Sex + Error(md$ET)))
+summary(aov(rank(pd.final) ~ md$SP*md$Sex + Error(md$ET)))
+
 dmm.fit <- read.table(file="16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.an.unique_list.0.03.subsample.0.03.dmm.mix.fit", header=T)
 n.dmms <- which.min(dmm.fit$Laplace)
 
 ```
-We compared the fecal communities between the two host species to test whether the genetic differences between the two animal species would translate into differences in their microbiotas. Using a variety of statistical tests, we were unable to detect a meaningful difference between the two species. First, there was not a significant difference in the richness (P=`r format(sobs.anova[[2]][[1]]$"Pr(>F)"[1], digits=2)`), Shannon diversity (P=`r format(shannon.anova[[2]][[1]]$"Pr(>F)"[1], digits=2)`), or phylogenetic diversity (P=0.95) between the two species of mice (Figure 2A). Second, there was not a significant difference in the community structures of the microbiota characterized from the two species (AMOVA; P~θ~=0.26; P~W~=0.33). Third, there was not a significant difference in the variation of their community structure within the microbiota characterized from the two species (HOMOVA; P~θ~=0.43; P~W~=0.33). Finally, when we attempted to fit the OTU abundance data to DMM models, there was no support for more than one (`r n.dmms`) community type. In each of these comparisons, the level of variation across mice within either species was considerable (Figure 2B).
+We compared the fecal communities between the two host species to test whether the genetic differences between the two animal species would translate into differences in their microbiotas. Using a variety of statistical tests, we were unable to detect a meaningful difference between the two species. First, there was not a significant difference in the richness (P=`r format(sobs.anova[[2]][[1]]$"Pr(>F)"[1], digits=2)`), Shannon diversity (P=`r format(shannon.anova[[2]][[1]]$"Pr(>F)"[1], digits=2)`), or phylogenetic diversity (P=`r format(pd.anova[[2]][[1]]$"Pr(>F)"[1], digits=2)`) between the two species of mice (Figure 2A). Second, there was not a significant difference in the community structures of the microbiota characterized from the two species (AMOVA; P~θ~=0.26; P~W~=0.33). Third, there was not a significant difference in the variation of their community structure within the microbiota characterized from the two species (HOMOVA; P~θ~=0.43; P~W~=0.33). Finally, when we attempted to fit the OTU abundance data to DMM models, there was no support for more than one (`r n.dmms`) community type. In each of these comparisons, the level of variation across mice within either species was considerable (Figure 2B).
 
 We observed two OTUs that were significantly different between the two species. These OTUs affiliated within the genus Barnesiella and unclassified members of the family Porphyromonadaceae (Figure 2C). Furthermore, among all of the OTUs, these provided the greatest mean decrease in accuracy (15.6 and 14.0, respectively) when we used the random forest machine-learning algorithm to distinguish between the Peromyscus species. For the random forest feature selection procedure, we observed an out of bag error rate of 31.5% suggesting that it was not possible to reliably use these OTUs to correctly classify the communities found in the two species of mice. Thus there was a lack of clear support for a differentiation in specific members of the Peromyscus species’ microbiotas that parallels that of their host species.
 
