@@ -1,8 +1,12 @@
-.ipynb_checkpoints/
+#mothur files
+*.design
+*.dist
+mothur*logfile
 *.analysis/
+
+#R files
 .Rproj.user
 *.Rproj
-mothur*logfile
 .RData
 .Rhistory
 
