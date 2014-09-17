@@ -68,11 +68,32 @@ for (dep in deps){
     install.packages(as.character(dep), quiet=TRUE);
   }
   library(dep, verbose=FALSE, character.only=TRUE)
-
-}
-library(&quot;randomForest&quot;, verbose=FALSE)
-
-sessionInfo()</code></pre>
+}</code></pre>
+<pre><code>## randomForest 4.6-10
+## Type rfNews() to see new features/changes/bug fixes.
+## Loading required package: permute
+## Loading required package: lattice
+## This is vegan 2.0-10</code></pre>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>## R version 3.1.0 (2014-04-10)
+## Platform: x86_64-apple-darwin13.1.0 (64-bit)
+## 
+## locale:
+## [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## other attached packages:
+## [1] knitr_1.6           date_1.2-34         vegan_2.0-10       
+## [4] lattice_0.20-29     permute_0.8-3       maps_2.3-7         
+## [7] randomForest_4.6-10
+## 
+## loaded via a namespace (and not attached):
+## [1] digest_0.6.4     evaluate_0.5.5   formatR_0.10     grid_3.1.0      
+## [5] htmltools_0.2.4  rmarkdown_0.2.64 stringr_0.6.2    tools_3.1.0     
+## [9] yaml_2.1.13</code></pre>
+<pre class="r"><code>perm = 1e2</code></pre>
 <p>To convert the R markdown to html (or any other format), you’ll also need to install the <a href="http://www.ncbi.nlm.nih.gov/books/NBK158900/">SRA tools package</a> and have a live internet connection. You can make the conversion using the <a href="http://yihui.name/knitr/">knitr package</a> from within R:</p>
 <pre class="r"><code>knitr(&quot;wild_mice.Rmd&quot;)</code></pre>
 <p>The goal of this document is to give a blow-by-blow accounting for how the analysis was done. Later in the document, we reproduce the text of the Results section of the paper where all of the numbers in the text are reproduced live. All of the commands below will work in a mac or linux environment. Some modification will be needed to get it to work in a windows environment.</p>
@@ -333,6 +354,10 @@ figure1()</code></pre>
 </div>
 <div id="host-species-does-not-affect-microbiota-structure" class="section level3">
 <h3>Host species does not affect microbiota structure</h3>
+<pre class="r"><code>#build design files for running homova
+sample &lt;- paste0(rownames(md), &quot;_16S&quot;)
+write.table(file=&quot;wild.species.design&quot;, cbind(as.character(sample), as.character(md$SP)), row.names=F, col.names=F, quote=F)
+write.table(file=&quot;wild.sex.design&quot;, cbind(as.character(sample), as.character(md$Sex)), row.names=F, col.names=F, quote=F)</code></pre>
 <pre class="bash"><code>mothur &quot;#
     sub.sample(shared=16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.an.unique_list.shared, size=4463);
     sub.sample(shared=16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pds.wang.pick.tx.shared, size=4463);
@@ -343,17 +368,20 @@ figure1()</code></pre>
     unifrac.weighted(tree=16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.phylip.tre, count=16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.uchime.pick.pick.count_table, distance=square, subsample=4463, iters=100)
     phylo.diversity(tree=current, count=current, iters=100, rarefy=T)
 
+    homova(phylip=16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.an.unique_list.0.03.subsample.thetayc.0.03.square.ave.dist, design=wild.species.design, iters=10000)
+    homova(phylip=16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.phylip.tre1.weighted.ave.dist, design=wild.species.design, iters=10000)
+
   get.communitytype(shared=16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.an.unique_list.0.03.subsample.shared)
-  get.communitytype(shared=16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pds.wang.pick.tx.1.subsample.shared)
 &quot;</code></pre>
-<pre class="r"><code>alpha &lt;- read.table(file=&quot;16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.an.unique_list.0.03.subsample.groups.ave-std.summary&quot;, header=T)
+<pre class="r"><code># alpha diversity analysis
+alpha &lt;- read.table(file=&quot;16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.an.unique_list.0.03.subsample.groups.ave-std.summary&quot;, header=T)
 alpha &lt;- alpha[alpha$method==&quot;ave&quot;,]
 rownames(alpha) &lt;- gsub(&quot;_16S&quot;, &quot;&quot;, alpha$group)
 o &lt;- order(rownames(alpha))
 alpha &lt;- alpha[o,]
 alpha &lt;- alpha[,-c(1,2,3)]
 
-stopifnot(sum(rownames(md)!=rownames(alpha)) == 0)
+stopifnot(sum(rownames(md)!=rownames(alpha)) == 0)  #make sure everything is in the same order
 
 sobs.anova &lt;- summary(aov(rank(alpha$sobs) ~ md$SP*md$Sex + Error(md$ET)))
 summary(aov(rank(alpha$sobs) ~ md$SP*md$Sex + Error(md$ET)))</code></pre>
@@ -388,7 +416,8 @@ pd.final &lt;- as.vector(pd[&quot;4463&quot;,])
 names(pd.final) &lt;- gsub(&quot;^X(.*)_16S&quot;, &quot;\\1&quot;, names(pd.final))
 o &lt;- order(names(pd.final))
 pd.final &lt;- pd.final[o]
-stopifnot(sum(names(pd.final) != rownames(md)) == 0)
+
+stopifnot(sum(names(pd.final) != rownames(md)) == 0)    #make sure everything is in the same order
 
 pd.anova &lt;- summary(aov(rank(pd.final) ~ md$SP*md$Sex + Error(md$ET)))
 summary(aov(rank(pd.final) ~ md$SP*md$Sex + Error(md$ET)))</code></pre>
@@ -403,9 +432,58 @@ summary(aov(rank(pd.final) ~ md$SP*md$Sex + Error(md$ET)))</code></pre>
 ## md$Sex         1   1381    1381    1.33   0.25
 ## md$SP:md$Sex   1    226     226    0.22   0.64
 ## Residuals    106 109939    1037</code></pre>
-<pre class="r"><code>dmm.fit &lt;- read.table(file=&quot;16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.an.unique_list.0.03.subsample.0.03.dmm.mix.fit&quot;, header=T)
+<pre class="r"><code># amova analysis
+dist &lt;- read.table(file=&quot;16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.an.unique_list.0.03.subsample.thetayc.0.03.square.ave.dist&quot;, skip=1, row.names=1)
+rownames(dist) &lt;- gsub(&quot;^(.*)_16S&quot;, &quot;\\1&quot;, rownames(dist))
+o &lt;- order(rownames(dist))
+dist &lt;- dist[o,o]
+stopifnot(sum(rownames(dist) != rownames(md)) == 0) #make sure everything is in the same order
+thetayc &lt;- as.dist(dist)
+
+thetayc.adonis &lt;- adonis(thetayc~md$SP*md$Sex, strata=md$ET, perm=perm)
+thetayc.adonis</code></pre>
+<pre><code>## 
+## Call:
+## adonis(formula = thetayc ~ md$SP * md$Sex, permutations = perm,      strata = md$ET) 
+## 
+## Terms added sequentially (first to last)
+## 
+##               Df SumsOfSqs MeanSqs F.Model    R2 Pr(&gt;F)
+## md$SP          1       0.8   0.792    2.18 0.019   0.47
+## md$Sex         1       0.6   0.557    1.53 0.014   0.37
+## md$SP:md$Sex   1       0.7   0.728    2.00 0.018   0.50
+## Residuals    107      38.9   0.363         0.949       
+## Total        110      41.0                 1.000</code></pre>
+<pre class="r"><code>dist &lt;- read.table(file=&quot;16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.phylip.tre1.weighted.ave.dist&quot;, skip=1, row.names=1)
+rownames(dist) &lt;- gsub(&quot;^(.*)_16S&quot;, &quot;\\1&quot;, rownames(dist))
+o &lt;- order(rownames(dist))
+dist &lt;- dist[o,o]
+stopifnot(sum(rownames(dist) != rownames(md)) == 0) #make sure everything is in the same order
+weighted &lt;- as.dist(dist)
+
+weighted.adonis &lt;- adonis(weighted~md$SP*md$Sex, strata=md$ET, perm=perm)
+weighted.adonis</code></pre>
+<pre><code>## 
+## Call:
+## adonis(formula = weighted ~ md$SP * md$Sex, permutations = perm,      strata = md$ET) 
+## 
+## Terms added sequentially (first to last)
+## 
+##               Df SumsOfSqs MeanSqs F.Model    R2 Pr(&gt;F)
+## md$SP          1      0.31  0.3051    4.14 0.036   0.32
+## md$Sex         1      0.11  0.1084    1.47 0.013   0.27
+## md$SP:md$Sex   1      0.13  0.1305    1.77 0.015   0.23
+## Residuals    107      7.88  0.0736         0.935       
+## Total        110      8.42                 1.000</code></pre>
+<pre class="r"><code># homova analysis
+theta.homova &lt;- read.table(file=&quot;16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.an.unique_list.0.03.subsample.thetayc.0.03.square.ave.homova&quot;, skip=1)
+weighted.homova &lt;- read.table(file=&quot;16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.phylip.tre1.weighted.ave.homova&quot;, skip=1)
+
+
+# community type analysis
+dmm.fit &lt;- read.table(file=&quot;16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.an.unique_list.0.03.subsample.0.03.dmm.mix.fit&quot;, header=T)
 n.dmms &lt;- which.min(dmm.fit$Laplace)</code></pre>
-<p>We compared the fecal communities between the two host species to test whether the genetic differences between the two animal species would translate into differences in their microbiotas. Using a variety of statistical tests, we were unable to detect a meaningful difference between the two species. First, there was not a significant difference in the richness (P=0.43), Shannon diversity (P=0.57), or phylogenetic diversity (P=0.65) between the two species of mice (Figure 2A). Second, there was not a significant difference in the community structures of the microbiota characterized from the two species (AMOVA; P<sub>θ</sub>=0.26; P<sub>W</sub>=0.33). Third, there was not a significant difference in the variation of their community structure within the microbiota characterized from the two species (HOMOVA; P<sub>θ</sub>=0.43; P<sub>W</sub>=0.33). Finally, when we attempted to fit the OTU abundance data to DMM models, there was no support for more than one (1) community type. In each of these comparisons, the level of variation across mice within either species was considerable (Figure 2B).</p>
+<p>We compared the fecal communities between the two host species to test whether the genetic differences between the two animal species would translate into differences in their microbiotas. Using a variety of statistical tests, we were unable to detect a meaningful difference between the two species. First, there was not a significant difference in the richness (P=0.43), Shannon diversity (P=0.57), or phylogenetic diversity (P=0.65) between the two species of mice (Figure 2A). Second, there was not a significant difference in the community structures of the microbiota characterized from the two species (AMOVA; P<sub>θ</sub>=0.47; P<sub>W</sub>=0.32). Third, there was not a significant difference in the variation of their community structure within the microbiota characterized from the two species (HOMOVA; P<sub>θ</sub>=0.37; P<sub>W</sub>=0.17). Finally, when we attempted to fit the OTU abundance data to DMM models, there was no support for more than one (1) community type. In each of these comparisons, the level of variation across mice within either species was considerable (Figure 2B).</p>
 <p>We observed two OTUs that were significantly different between the two species. These OTUs affiliated within the genus Barnesiella and unclassified members of the family Porphyromonadaceae (Figure 2C). Furthermore, among all of the OTUs, these provided the greatest mean decrease in accuracy (15.6 and 14.0, respectively) when we used the random forest machine-learning algorithm to distinguish between the Peromyscus species. For the random forest feature selection procedure, we observed an out of bag error rate of 31.5% suggesting that it was not possible to reliably use these OTUs to correctly classify the communities found in the two species of mice. Thus there was a lack of clear support for a differentiation in specific members of the Peromyscus species’ microbiotas that parallels that of their host species.</p>
 <p>One striking feature of the communities observed between the mice was the large amount of variation in the composition of their gut microbiota. We observed a total of 2,925 OTUs among all of the mice; however, the median number of OTUs observed in each mouse was 65 (95% confidence interval=43-100). Across all of the OTUs, 5 were observed in every mouse and 27 were observed in at least 90% of the mice (Figure 3A). These OTUs affiliated with 12 different genera and represented 37% of all of the 16S rRNA gene sequences sampled from the mice (Figure 3A). These OTUs did not overlap with the two OTUs that were identified as being significantly different between the two species of mice. We next considered the taxonomic diversity of bacterial genera. Among the 475 genera that were observed, 28 were observed in at least 90% of the mice and 12 were observed in every mouse sampled (Figure 3B). Those genera found in at least 90% of the mice represented 87% of all sequences sampled and those found in every animal represented 75% of all sequences sampled. Within each animal we identified the dominant genus and observed that Lactobacillus was the dominant genus in 39% of the mice followed by Lachnospiraceae (27%) and Porphyromonadaceae (16%). These results demonstrate that among the Peromyscus spp. animals that we sampled, there was a conserved taxonomic core.</p>
 </div>

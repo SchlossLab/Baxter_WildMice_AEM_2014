@@ -10,7 +10,7 @@ This is a digital notebook to accompany the paper titled, "Intra- and inter-indi
 
 This document was generated using [mothur v.1.33](http://www.mothur.org/wiki) and [R](http://www.r-project.org):
 
-```{r}
+```{r, warning=FALSE}
 
 deps = c("randomForest", "maps", "vegan", "date", "knitr");
 
@@ -19,11 +19,11 @@ for (dep in deps){
     install.packages(as.character(dep), quiet=TRUE);
   }
   library(dep, verbose=FALSE, character.only=TRUE)
-
 }
-library("randomForest", verbose=FALSE)
 
 sessionInfo()
+
+perm = 1e2
 ```
 
 To convert the R markdown to html (or any other format), you'll also need to install the [SRA tools package](http://www.ncbi.nlm.nih.gov/books/NBK158900/) and have a live internet connection. You can make the conversion using the [knitr package](http://yihui.name/knitr/) from within R:
@@ -332,7 +332,15 @@ figure1()
 
 
 ### Host species does not affect microbiota structure
-````{r, engine='bash', eval=FALSE}
+
+```{r}
+#build design files for running homova
+sample <- paste0(rownames(md), "_16S")
+write.table(file="wild.species.design", cbind(as.character(sample), as.character(md$SP)), row.names=F, col.names=F, quote=F)
+write.table(file="wild.sex.design", cbind(as.character(sample), as.character(md$Sex)), row.names=F, col.names=F, quote=F)
+```
+
+```{r, engine='bash', eval=FALSE}
 mothur "#
 	sub.sample(shared=16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.an.unique_list.shared, size=4463);
 	sub.sample(shared=16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pds.wang.pick.tx.shared, size=4463);
@@ -343,8 +351,10 @@ mothur "#
 	unifrac.weighted(tree=16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.phylip.tre, count=16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.uchime.pick.pick.count_table, distance=square, subsample=4463, iters=100)
 	phylo.diversity(tree=current, count=current, iters=100, rarefy=T)
 
+	homova(phylip=16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.an.unique_list.0.03.subsample.thetayc.0.03.square.ave.dist, design=wild.species.design, iters=10000)
+	homova(phylip=16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.phylip.tre1.weighted.ave.dist, design=wild.species.design, iters=10000)
+
   get.communitytype(shared=16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.an.unique_list.0.03.subsample.shared)
-  get.communitytype(shared=16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pds.wang.pick.tx.1.subsample.shared)
 "
 ```
 
@@ -387,7 +397,7 @@ dist <- dist[o,o]
 stopifnot(sum(rownames(dist) != rownames(md)) == 0)	#make sure everything is in the same order
 thetayc <- as.dist(dist)
 
-thetayc.adonis <- adonis(thetayc~md$SP*md$Sex, strata=md$ET, perm=1e4)
+thetayc.adonis <- adonis(thetayc~md$SP*md$Sex, strata=md$ET, perm=perm)
 thetayc.adonis
 
 dist <- read.table(file="16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.phylip.tre1.weighted.ave.dist", skip=1, row.names=1)
@@ -397,10 +407,13 @@ dist <- dist[o,o]
 stopifnot(sum(rownames(dist) != rownames(md)) == 0)	#make sure everything is in the same order
 weighted <- as.dist(dist)
 
-weighted.adonis <- adonis(weighted~md$SP*md$Sex, strata=md$ET, perm=1e4)
+weighted.adonis <- adonis(weighted~md$SP*md$Sex, strata=md$ET, perm=perm)
 weighted.adonis
 
 
+# homova analysis
+theta.homova <- read.table(file="16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.an.unique_list.0.03.subsample.thetayc.0.03.square.ave.homova", skip=1)
+weighted.homova <- read.table(file="16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.phylip.tre1.weighted.ave.homova", skip=1)
 
 
 # community type analysis
@@ -408,7 +421,7 @@ dmm.fit <- read.table(file="16S.analysis/wild_mice.16S.trim.contigs.unique.good.
 n.dmms <- which.min(dmm.fit$Laplace)
 
 ```
-We compared the fecal communities between the two host species to test whether the genetic differences between the two animal species would translate into differences in their microbiotas. Using a variety of statistical tests, we were unable to detect a meaningful difference between the two species. First, there was not a significant difference in the richness (P=`r format(sobs.anova[[2]][[1]]$"Pr(>F)"[1], digits=2)`), Shannon diversity (P=`r format(shannon.anova[[2]][[1]]$"Pr(>F)"[1], digits=2)`), or phylogenetic diversity (P=`r format(pd.anova[[2]][[1]]$"Pr(>F)"[1], digits=2)`) between the two species of mice (Figure 2A). Second, there was not a significant difference in the community structures of the microbiota characterized from the two species (AMOVA; P~θ~=`r format(thetayc.adonis$aov.tab$"Pr(>F)"[1], digits=2)`; P~W~=`r format(weighted.adonis$aov.tab$"Pr(>F)"[1], digits=2)`). Third, there was not a significant difference in the variation of their community structure within the microbiota characterized from the two species (HOMOVA; P~θ~=0.43; P~W~=0.33). Finally, when we attempted to fit the OTU abundance data to DMM models, there was no support for more than one (`r n.dmms`) community type. In each of these comparisons, the level of variation across mice within either species was considerable (Figure 2B).
+We compared the fecal communities between the two host species to test whether the genetic differences between the two animal species would translate into differences in their microbiotas. Using a variety of statistical tests, we were unable to detect a meaningful difference between the two species. First, there was not a significant difference in the richness (P=`r format(sobs.anova[[2]][[1]]$"Pr(>F)"[1], digits=2)`), Shannon diversity (P=`r format(shannon.anova[[2]][[1]]$"Pr(>F)"[1], digits=2)`), or phylogenetic diversity (P=`r format(pd.anova[[2]][[1]]$"Pr(>F)"[1], digits=2)`) between the two species of mice (Figure 2A). Second, there was not a significant difference in the community structures of the microbiota characterized from the two species (AMOVA; P~θ~=`r format(thetayc.adonis$aov.tab$"Pr(>F)"[1], digits=2)`; P~W~=`r format(weighted.adonis$aov.tab$"Pr(>F)"[1], digits=2)`). Third, there was not a significant difference in the variation of their community structure within the microbiota characterized from the two species (HOMOVA; P~θ~=`r format(theta.homova[,3], digits=2)`; P~W~=`r format(weighted.homova[,3], digits=2)`). Finally, when we attempted to fit the OTU abundance data to DMM models, there was no support for more than one (`r n.dmms`) community type. In each of these comparisons, the level of variation across mice within either species was considerable (Figure 2B).
 
 We observed two OTUs that were significantly different between the two species. These OTUs affiliated within the genus Barnesiella and unclassified members of the family Porphyromonadaceae (Figure 2C). Furthermore, among all of the OTUs, these provided the greatest mean decrease in accuracy (15.6 and 14.0, respectively) when we used the random forest machine-learning algorithm to distinguish between the Peromyscus species. For the random forest feature selection procedure, we observed an out of bag error rate of 31.5% suggesting that it was not possible to reliably use these OTUs to correctly classify the communities found in the two species of mice. Thus there was a lack of clear support for a differentiation in specific members of the Peromyscus species’ microbiotas that parallels that of their host species.
 
