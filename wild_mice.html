@@ -484,7 +484,82 @@ weighted.homova &lt;- read.table(file=&quot;16S.analysis/wild_mice.16S.trim.cont
 dmm.fit &lt;- read.table(file=&quot;16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.an.unique_list.0.03.subsample.0.03.dmm.mix.fit&quot;, header=T)
 n.dmms &lt;- which.min(dmm.fit$Laplace)</code></pre>
 <p>We compared the fecal communities between the two host species to test whether the genetic differences between the two animal species would translate into differences in their microbiotas. Using a variety of statistical tests, we were unable to detect a meaningful difference between the two species. First, there was not a significant difference in the richness (P=0.43), Shannon diversity (P=0.57), or phylogenetic diversity (P=0.65) between the two species of mice (Figure 2A). Second, there was not a significant difference in the community structures of the microbiota characterized from the two species (AMOVA; P<sub>θ</sub>=0.47; P<sub>W</sub>=0.32). Third, there was not a significant difference in the variation of their community structure within the microbiota characterized from the two species (HOMOVA; P<sub>θ</sub>=0.37; P<sub>W</sub>=0.17). Finally, when we attempted to fit the OTU abundance data to DMM models, there was no support for more than one (1) community type. In each of these comparisons, the level of variation across mice within either species was considerable (Figure 2B).</p>
-<p>We observed two OTUs that were significantly different between the two species. These OTUs affiliated within the genus Barnesiella and unclassified members of the family Porphyromonadaceae (Figure 2C). Furthermore, among all of the OTUs, these provided the greatest mean decrease in accuracy (15.6 and 14.0, respectively) when we used the random forest machine-learning algorithm to distinguish between the Peromyscus species. For the random forest feature selection procedure, we observed an out of bag error rate of 31.5% suggesting that it was not possible to reliably use these OTUs to correctly classify the communities found in the two species of mice. Thus there was a lack of clear support for a differentiation in specific members of the Peromyscus species’ microbiotas that parallels that of their host species.</p>
+<pre class="r"><code>subsampled &lt;-read.table(file=&quot;16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.an.unique_list.0.03.subsample.shared&quot;, header=T, row.names=2)
+subsampled &lt;- subsampled[,-c(1,2)]
+rownames(subsampled) &lt;- gsub(&quot;_16S&quot;, &quot;&quot;, rownames(subsampled))
+o &lt;- order(rownames(subsampled))
+subsampled &lt;- subsampled[o,]
+stopifnot(sum(rownames(md)!=rownames(subsampled)) == 0) #make sure everything is in the same order
+
+
+nseqs &lt;- apply(subsampled, 1, sum)[1]
+relabund &lt;- subsampled/nseqs
+
+common &lt;- apply(relabund &gt; 0, 2, sum)/nrow(relabund) &gt; 0.5 #does it show up in more than half of the samples?
+relabund.common &lt;- relabund[,common]
+
+p.sex &lt;- rep(0, ncol(relabund.common))
+p.species &lt;- rep(0, ncol(relabund.common))
+p.interact &lt;- rep(0, ncol(relabund.common))
+
+for(i in 1:ncol(relabund.common)){
+    rdata &lt;- rank(relabund.common[,i])
+    model &lt;- summary(aov(rdata ~ md$Sex*md$SP + Error(md$ET)))[[2]][[1]]
+    p.sex[i] &lt;- model$Pr[1]
+    p.species[i] &lt;- model$Pr[2]
+    p.interact[i] &lt;- model$Pr[3]
+}
+sig.species &lt;- p.adjust(p.species)&lt;0.05
+n.sig.tests &lt;- sum(sig.species)
+p.adjust(p.species)</code></pre>
+<pre><code>##   [1] 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000
+##   [9] 1.00000 0.75007 1.00000 1.00000 1.00000 0.68375 1.00000 1.00000
+##  [17] 1.00000 1.00000 1.00000 0.01686 1.00000 1.00000 1.00000 1.00000
+##  [25] 0.75683 1.00000 1.00000 1.00000 0.82806 1.00000 0.61834 1.00000
+##  [33] 1.00000 1.00000 0.19953 1.00000 1.00000 1.00000 1.00000 1.00000
+##  [41] 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000
+##  [49] 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000
+##  [57] 1.00000 0.40657 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000
+##  [65] 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000
+##  [73] 1.00000 1.00000 1.00000 1.00000 0.43080 1.00000 1.00000 1.00000
+##  [81] 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000
+##  [89] 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000
+##  [97] 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000
+## [105] 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000
+## [113] 0.89261 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000
+## [121] 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000
+## [129] 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000
+## [137] 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000 0.24786
+## [145] 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000
+## [153] 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000 0.89261 1.00000
+## [161] 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000 0.50933
+## [169] 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000 1.00000
+## [177] 1.00000 1.00000</code></pre>
+<pre class="r"><code>sig.otu &lt;- colnames(relabund.common)[sig.species]
+
+cons.tax &lt;- read.table(file=&quot;16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.an.unique_list.0.03.cons.taxonomy&quot;, header=TRUE, row.names=1)
+taxa &lt;- gsub(&quot;\\(\\d*\\)&quot;, &quot;&quot;, cons.tax[,&quot;Taxonomy&quot;])
+taxa &lt;- gsub('\&quot;', &quot;&quot;, taxa)
+taxa &lt;- gsub(&quot;unclassified;&quot;, &quot;&quot;, taxa)
+taxa &lt;- gsub(&quot;;$&quot;, &quot;&quot;, taxa)
+taxa &lt;- gsub(&quot;^.*;&quot;, &quot;&quot;, taxa)
+names(taxa) &lt;- rownames(cons.tax)
+
+sig.taxon &lt;- taxa[sig.otu]
+
+
+# Random forest
+set.seed(1)
+forest &lt;- randomForest(x=as.matrix(relabund.common), y=md$SP, importance=TRUE, proximity=TRUE, ntree=10000) #run random forest
+
+confusion &lt;- forest[[5]][,1:2]
+oob.error &lt;- (confusion[1,2]+confusion[2,1])/sum(confusion)*100
+
+imp &lt;- importance(forest)
+most.imp.otus &lt;- rownames(imp[order(imp[,&quot;MeanDecreaseAccuracy&quot;], decreasing=T)[1:3],])
+most.imp.taxa &lt;- taxa[most.imp.otus]
+most.imp.mda &lt;- imp[most.imp.otus, &quot;MeanDecreaseAccuracy&quot;]</code></pre>
+<p>We observed one (1) OTU that was significantly different between the two species. This OTU affiliated among the unclassified members of the family <em>Porphyromonadaceae</em> (Figure 2C). Furthermore, among all of the OTUs, this OTU provided the greatest mean decrease in accuracy (MDA=22.6) when we used the random forest machine-learning algorithm to distinguish between the <em>Peromyscus</em> species. The next two OTUs which resulted in the greated mean decrease in accuracy were an OTU associated with the <em>Barnesiella</em> and <em>Porphyromonadaceae</em> (MDA=19.5 and 17.7, respectively). For the random forest feature selection procedure, we observed an out of bag error rate of 43.2% suggesting that it was not possible to reliably use these OTUs to correctly classify the communities found in the two species of mice. Thus there was a lack of clear support for a differentiation in specific members of the <em>Peromyscus</em> species’ microbiotas that parallels that of their host species.</p>
 <p>One striking feature of the communities observed between the mice was the large amount of variation in the composition of their gut microbiota. We observed a total of 2,925 OTUs among all of the mice; however, the median number of OTUs observed in each mouse was 65 (95% confidence interval=43-100). Across all of the OTUs, 5 were observed in every mouse and 27 were observed in at least 90% of the mice (Figure 3A). These OTUs affiliated with 12 different genera and represented 37% of all of the 16S rRNA gene sequences sampled from the mice (Figure 3A). These OTUs did not overlap with the two OTUs that were identified as being significantly different between the two species of mice. We next considered the taxonomic diversity of bacterial genera. Among the 475 genera that were observed, 28 were observed in at least 90% of the mice and 12 were observed in every mouse sampled (Figure 3B). Those genera found in at least 90% of the mice represented 87% of all sequences sampled and those found in every animal represented 75% of all sequences sampled. Within each animal we identified the dominant genus and observed that Lactobacillus was the dominant genus in 39% of the mice followed by Lachnospiraceae (27%) and Porphyromonadaceae (16%). These results demonstrate that among the Peromyscus spp. animals that we sampled, there was a conserved taxonomic core.</p>
 </div>
 <div id="effects-of-host-physiology-on-diversity-and-richness" class="section level3">
