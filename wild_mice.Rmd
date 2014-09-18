@@ -378,8 +378,8 @@ summary(aov(rank(alpha$shannon) ~ md$SP*md$Sex + Error(md$ET)))
 
 
 pd <- read.table(file="16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.phylip.1.phylodiv.rarefaction", header=T, row.names=1)
-pd.final <- as.vector(pd["4463",])
-names(pd.final) <- gsub("^X(.*)_16S", "\\1", names(pd.final))
+pd.final <- as.vector(t(pd["4463",]))
+names(pd.final) <- gsub("^X(.*)_16S", "\\1", colnames(pd))
 o <- order(names(pd.final))
 pd.final <- pd.final[o]
 
@@ -431,7 +431,6 @@ o <- order(rownames(subsampled))
 subsampled <- subsampled[o,]
 stopifnot(sum(rownames(md)!=rownames(subsampled)) == 0)	#make sure everything is in the same order
 
-
 nseqs <- apply(subsampled, 1, sum)[1]
 relabund <- subsampled/nseqs
 
@@ -443,7 +442,7 @@ p.species <- rep(0, ncol(relabund.common))
 p.interact <- rep(0, ncol(relabund.common))
 
 for(i in 1:ncol(relabund.common)){
-	rdata <- rank(relabund.common[,i])
+	rdata <- rank(relabund.common[,i]) # rank transformation of the data
 	model <- summary(aov(rdata ~ md$Sex*md$SP + Error(md$ET)))[[2]][[1]]
 	p.sex[i] <- model$Pr[1]
 	p.species[i] <- model$Pr[2]
@@ -451,7 +450,6 @@ for(i in 1:ncol(relabund.common)){
 }
 sig.species <- p.adjust(p.species)<0.05
 n.sig.tests <- sum(sig.species)
-p.adjust(p.species)
 sig.otu <- colnames(relabund.common)[sig.species]
 
 cons.tax <- read.table(file="16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.an.unique_list.0.03.cons.taxonomy", header=TRUE, row.names=1)
@@ -476,6 +474,56 @@ imp <- importance(forest)
 most.imp.otus <- rownames(imp[order(imp[,"MeanDecreaseAccuracy"], decreasing=T)[1:3],])
 most.imp.taxa <- taxa[most.imp.otus]
 most.imp.mda <- imp[most.imp.otus, "MeanDecreaseAccuracy"]
+```
+
+```{r, height=4, width=6.5}
+	l <- layout(matrix(c(	1,4,6,
+							2,4,6,
+							2,5,6,
+							3,5,6
+							
+							), nrow=4, byrow=T),height=c(3,1.5,1.5,6.25), width=c(3,4,4))
+#	layout.show(l)
+	
+	pl.shannon <- aggregate(alpha$shannon[md$SP=="PL"], by=list(md$ET[md$SP=="PL"]), median)$x
+	pmg.shannon <- aggregate(alpha$shannon[md$SP=="PMG"], by=list(md$ET[md$SP=="PMG"]), median)$x
+	med.pl <- median(pl.shannon)
+	med.pmg <- median(pmg.shannon)
+
+	par(mar=c(0, 5, 0.5, 0.5))
+	stripchart(at=0.25, pl.shannon, vertical=T, method="jitter", ylim=c(0,5), ylab="Shannon\ndiversity", xlab="", xaxt="n",  yaxt="n", bg="white", pch=21, xlim=c(0,1))
+	stripchart(at=0.75, pmg.shannon, vertical=T, method="jitter", xlab="", xaxt="n", yaxt="n", bg="black", pch=21, add=T)
+
+	segments(x0=0.1, x1=0.4, y0=med.pl, lwd=3)
+	segments(x0=0.6, x1=0.9, y0=med.pl, lwd=3)
+	axis(2, las=2)
+	mtext(side=2, at=4.8, line=2.5, cex=1.25, las=1, font=2, text="A")
+
+	pl.sobs <- aggregate(alpha$sobs[md$SP=="PL"], by=list(md$ET[md$SP=="PL"]), median)$x
+	pmg.sobs <- aggregate(alpha$sobs[md$SP=="PMG"], by=list(md$ET[md$SP=="PMG"]), median)$x
+	med.pl <- median(pl.sobs)
+	med.pmg <- median(pmg.sobs)
+
+	par(mar=c(0, 5, 0.5, 0.5))
+	stripchart(at=0.25, pl.sobs, vertical=T, method="jitter", ylim=c(0,400), ylab="Number of\nOTUs observed", xlab="", xaxt="n",  yaxt="n", bg="white", pch=21, xlim=c(0,1))
+	stripchart(at=0.75, pmg.sobs, vertical=T, method="jitter", xlab="", xaxt="n", yaxt="n", bg="black", pch=21, add=T)
+	segments(x0=0.1, x1=0.4, y0=med.pl, lwd=3)
+	segments(x0=0.6, x1=0.9, y0=med.pmg, lwd=3)
+	axis(2, las=2)
+
+	pl.pd <- aggregate(pd.final[md$SP=="PL"], by=list(md$ET[md$SP=="PL"]), median)$x
+	pmg.pd <- aggregate(pd.final[md$SP=="PMG"], by=list(md$ET[md$SP=="PMG"]), median)$x
+	med.pl <- median(pd.final)
+	med.pmg <- median(pd.final)
+
+	par(mar=c(8, 5, 0.5, 0.5))
+	stripchart(at=0.25, pl.pd, vertical=T, method="jitter", ylim=c(0,18), ylab="Phylogenetic\ndiversity", xlab="", xaxt="n",  yaxt="n", bg="white", pch=21, xlim=c(0,1))
+	stripchart(at=0.75, pmg.pd, vertical=T, method="jitter", xlab="", xaxt="n", yaxt="n", bg="black", pch=21, add=T)
+
+	segments(x0=0.1, x1=0.4, y0=med.pl, lwd=3)
+	segments(x0=0.6, x1=0.9, y0=med.pmg, lwd=3)
+	axis(1, at=c(0.25,0.75), label=c(expression(italic("P. leucopis")), expression(italic("P. maniculatus\ngracilis"))), las=2, tick=F)
+	axis(2, las=2)
 ```
 
 We observed one (`r n.sig.tests`) OTU that was significantly different between the two species. This OTU affiliated among the unclassified members of the family _`r sig.taxon`_ (Figure 2C). Furthermore, among all of the OTUs, this OTU provided the greatest mean decrease in accuracy (MDA=`r format(most.imp.mda[[1]], digits=3)`) when we used the random forest machine-learning algorithm to distinguish between the _Peromyscus_ species. The next two OTUs which resulted in the greated mean decrease in accuracy were an OTU associated with the _`r most.imp.taxa[2]`_ and _`r most.imp.taxa[3]`_ (MDA=`r format(most.imp.mda[2], digits=3)` and `r format(most.imp.mda[3], digits=3)`, respectively). For the random forest feature selection procedure, we observed an out of bag error rate of `r format(oob.error, digits=3)`% suggesting that it was not possible to reliably use these OTUs to correctly classify the communities found in the two species of mice. Thus there was a lack of clear support for a differentiation in specific members of the _Peromyscus_ species’ microbiotas that parallels that of their host species.
