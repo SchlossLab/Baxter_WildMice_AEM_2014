@@ -634,7 +634,22 @@ figure2()
 
 We observed one (`r n.sig.tests`) OTU that was significantly different between the two species. This OTU affiliated among the unclassified members of the family _`r sig.taxon`_ (Figure 2C). Furthermore, among all of the OTUs, this OTU provided the greatest mean decrease in accuracy (MDA=`r format(most.imp.mda[[1]], digits=3)`) when we used the random forest machine-learning algorithm to distinguish between the _Peromyscus_ species. The next two OTUs which resulted in the greated mean decrease in accuracy were an OTU associated with the _`r most.imp.taxa[2]`_ and _`r most.imp.taxa[3]`_ (MDA=`r format(most.imp.mda[2], digits=3)` and `r format(most.imp.mda[3], digits=3)`, respectively). For the random forest feature selection procedure, we observed an out of bag error rate of `r format(oob.error, digits=3)`% suggesting that it was not possible to reliably use these OTUs to correctly classify the communities found in the two species of mice. Thus there was a lack of clear support for a differentiation in specific members of the _Peromyscus_ species’ microbiotas that parallels that of their host species.
 
-One striking feature of the communities observed between the mice was the large amount of variation in the composition of their gut microbiota. We observed a total of 2,925 OTUs among all of the mice; however, the median number of OTUs observed in each mouse was 65 (95% confidence interval=43-100). Across all of the OTUs, 5 were observed in every mouse and 27 were observed in at least 90% of the mice (Figure 3A). These OTUs affiliated with 12 different genera and represented 37% of all of the 16S rRNA gene sequences sampled from the mice (Figure 3A). These OTUs did not overlap with the two OTUs that were identified as being significantly different between the two species of mice. We next considered the taxonomic diversity of bacterial genera. Among the 475 genera that were observed, 28 were observed in at least 90% of the mice and 12 were observed in every mouse sampled (Figure 3B). Those genera found in at least 90% of the mice represented 87% of all sequences sampled and those found in every animal represented 75% of all sequences sampled. Within each animal we identified the dominant genus and observed that Lactobacillus was the dominant genus in 39% of the mice followed by Lachnospiraceae (27%) and Porphyromonadaceae (16%). These results demonstrate that among the Peromyscus spp. animals that we sampled, there was a conserved taxonomic core.
+```{r}
+total.n.otus <- ncol(subsampled)
+distribution <- quantile(alpha$sobs, c(0.025, 0.50, 0.975))
+present90 <- apply(subsampled>0, 2, sum) >= 0.90*nrow(subsampled)
+n.present90 <- sum(apply(subsampled>0, 2, sum) >= 0.90*nrow(subsampled))
+otu.present90 <- colnames(subsampled)[present90]
+ntaxa.present90 <- levels(factor(taxa[otu.present90]))
+percent.present90 <- 100 * sum(subsampled[,present90])/sum(subsampled)
+
+n.presentAll <- sum(apply(subsampled>0, 2, sum) == nrow(subsampled))
+#0
+
+
+```
+
+One striking feature of the communities observed between the mice was the large amount of variation in the composition of their gut microbiota. We observed a total of `r total.n.otus` OTUs among all of the mice; however, the median number of OTUs observed in each mouse was `r distribution["50%"]` (95% confidence interval=`r distribution["2.5%"]`-`r distribution["97.5%"]`). Across all of the OTUs, no (`r n.presentAll`) OTUs were present in every sample, but `r n.present90` were observed in at least 90% of the mice (Figure 3A). These OTUs affiliated with `r ntaxa.present90` different genera and represented `r format(percent.present90, digits=3)`% of all of the 16S rRNA gene sequences sampled from the mice (Figure 3A). These OTUs did not overlap with the two OTUs that were identified as being significantly different between the two species of mice. We next considered the taxonomic diversity of bacterial genera. Among the 475 genera that were observed, 28 were observed in at least 90% of the mice and 12 were observed in every mouse sampled (Figure 3B). Those genera found in at least 90% of the mice represented 87% of all sequences sampled and those found in every animal represented 75% of all sequences sampled. Within each animal we identified the dominant genus and observed that Lactobacillus was the dominant genus in 39% of the mice followed by Lachnospiraceae (27%) and Porphyromonadaceae (16%). These results demonstrate that among the Peromyscus spp. animals that we sampled, there was a conserved taxonomic core.
 
 
 ### Effects of host physiology on diversity and richness
