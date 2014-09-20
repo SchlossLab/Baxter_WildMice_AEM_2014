@@ -474,17 +474,20 @@ imp <- importance(forest)
 most.imp.otus <- rownames(imp[order(imp[,"MeanDecreaseAccuracy"], decreasing=T)[1:3],])
 most.imp.taxa <- taxa[most.imp.otus]
 most.imp.mda <- imp[most.imp.otus, "MeanDecreaseAccuracy"]
+
 ```
 
-```{r, height=4, width=6.5}
+```{r, height=4, width=7.5, warning=FALSE, fig.align='center', tidy=TRUE, render="pdf"}
+figure2 <- function(){
 	l <- layout(matrix(c(	1,4,6,
 							2,4,6,
 							2,5,6,
 							3,5,6
 							
-							), nrow=4, byrow=T),height=c(3,1.5,1.5,6.25), width=c(3,4,4))
-#	layout.show(l)
+							), nrow=4, byrow=T),height=c(3,1.5,1.5,6.25), width=c(3,4,5))
 	
+
+	# panel A
 	pl.shannon <- aggregate(alpha$shannon[md$SP=="PL"], by=list(md$ET[md$SP=="PL"]), median)$x
 	pmg.shannon <- aggregate(alpha$shannon[md$SP=="PMG"], by=list(md$ET[md$SP=="PMG"]), median)$x
 	med.pl <- median(pl.shannon)
@@ -524,6 +527,109 @@ most.imp.mda <- imp[most.imp.otus, "MeanDecreaseAccuracy"]
 	segments(x0=0.6, x1=0.9, y0=med.pmg, lwd=3)
 	axis(1, at=c(0.25,0.75), label=c(expression(italic("P. leucopis")), expression(italic("P. maniculatus\ngracilis"))), las=2, tick=F)
 	axis(2, las=2)
+
+
+	# panel B
+	pl <- numeric()
+	pmg <- numeric()
+	between <- numeric()
+	
+	pl.et <- factor(md[md$SP=="PL", "ET"])
+	thetayc <- as.matrix(thetayc)
+	for(et in pl.et){
+		pl[et] <- median(unlist(thetayc[md$ET==et, md$ET!=et]))
+		between[et] <- median(unlist(thetayc[md$ET==et, md$SP!="PL"]))
+	}
+	
+	pmg.et <- factor(md[md$SP=="PMG", "ET"])
+	for(et in pmg.et){
+		pmg[et] <- median(unlist(thetayc[md$ET==et, md$ET!=et]))
+		between[et] <- median(unlist(thetayc[md$ET==et, md$SP!="PMG"]))
+	}
+	
+	par(mar=c(0, 5, 0.5, 0.5))
+	stripchart(at=1, pl, vertical=T, method="jitter", jitter=0.3, xlim=c(0.5,3.5), ylim=c(0,1.0), yaxt="n", pch=21, bg="white", ylab=expression(paste("Median ", theta["YC"], " distance", sep=" ")))
+	stripchart(at=2, pmg, vertical=T, method="jitter", jitter=0.3, add=T, pch=19, col="black")
+	stripchart(at=3, between, vertical=T, method="jitter", jitter=0.3, add=T, pch=19, col="gray")
+	#axis(1, at=1:3, label=c("Among\nP. leucopis", "Among\nP. maniculatus\ngracilis", "Between\nspecies"), las=2, tick=F)
+	axis(2, las=2)
+	segments(x0=c(0.6, 1.6, 2.6), x1=c(1.4, 2.4, 3.4), y0=c(median(pl), median(pmg), median(pmg)), y1=c(median(pl), median(pmg), median(pmg)), lwd=4, lty=1)
+	mtext(side=2, at=1.0, line=2.5, cex=1.25, las=1, font=2, text="B")
+
+		
+	
+	weighted <- as.matrix(weighted)
+
+	pl <- numeric()
+	pmg <- numeric()
+	between <- numeric()
+	
+	pl.et <- factor(md[md$SP=="PL", "ET"])
+	for(et in pl.et){
+		pl[et] <- median(unlist(weighted[md$ET==et, md$ET!=et]))
+			between[et] <- median(unlist(weighted[md$ET==et, md$SP!="PL"]))
+	}
+	
+	pmg.et <- factor(md[md$SP=="PMG", "ET"])
+	for(et in pmg.et){
+		pmg[et] <- median(unlist(weighted[md$ET==et, md$ET!=et]))
+		between[et] <- median(unlist(weighted[md$ET==et, md$SP!="PMG"]))
+	}
+	
+	par(mar=c(8, 5, 0.5, 0.5))
+	stripchart(at=1, pl, vertical=T, method="jitter", jitter=0.3, xlim=c(0.5,3.5), ylim=c(0,1.0), yaxt="n", pch=21, bg="white", ylab="Median weighted\nUniFrac distance")
+	stripchart(at=2, pmg, vertical=T, method="jitter", jitter=0.3, add=T, pch=19, col="black")
+	stripchart(at=3, between, vertical=T, method="jitter", jitter=0.3, add=T, pch=19, col="gray")
+	axis(1, at=1:3, label=c("Among\nP. leucopis", "Among\nP. maniculatus\ngracilis", "Between\nspecies"), las=2, tick=F)
+	axis(2, las=2)
+	segments(x0=c(0.6, 1.6, 2.6), x1=c(1.4, 2.4, 3.4), y0=c(median(pl), median(pmg), median(pmg)), y1=c(median(pl), median(pmg), median(pmg)), lwd=4, lty=1)
+	#mtext(side=2, at=1.0, line=2.5, cex=1.25, las=1, font=2, text="B")
+
+
+	# panel C
+	first <- aggregate(subsampled[,most.imp.otus[1]]/nseqs, by=list(md$SP, md$ET), median)
+	first.pl <- first[first$Group.1=="PL", "x"]
+	first.pmg <- first[first$Group.1=="PMG", "x"]
+	first.med <- median(first$x)
+	
+	second <- aggregate(subsampled[,most.imp.otus[2]]/nseqs, by=list(md$SP, md$ET), median)
+	second.pl <- second[second$Group.1=="PL", "x"]
+	second.pmg <- second[second$Group.1=="PMG", "x"]
+	second.med <- median(second$x)
+	
+	third <- aggregate(subsampled[,most.imp.otus[3]]/nseqs, by=list(md$SP, md$ET), median)
+	third.pl <- third[third$Group.1=="PL", "x"]
+	third.pmg <- third[third$Group.1=="PMG", "x"]
+	third.med <- median(third$x)
+	par(mar=c(8, 5, 0.5, 0.5))
+	
+	plot(1, xlim=c(0, 1.5), ylim=c(0,0.015), type="n", xaxt="n", yaxt="n", xlab="", ylab="Relative abundance (%)")
+	
+	stripchart(at=0.15, first.pl, vertical=T, method="jitter", pch=21, bg="white", add=T, jitter=0.05)
+	stripchart(at=0.35, first.pmg, vertical=T, method="jitter", pch=21, bg="black", add=T, jitter=0.05)
+	segments(x0=0.10, x1=0.20, y0=median(first.pl), lwd=3)
+	segments(x0=0.30, x1=0.40, y0=median(first.pmg), lwd=3)
+	
+	stripchart(at=0.65, second.pl, vertical=T, method="jitter", pch=21, bg="white", add=T, jitter=0.05)
+	stripchart(at=0.85, second.pmg, vertical=T, method="jitter", pch=21, bg="black", add=T, jitter=0.05)
+	segments(x0=0.6, x1=0.7, y0=median(second.pl), lwd=3)
+	segments(x0=0.8, x1=0.9, y0=median(second.pmg), lwd=3)
+		
+	stripchart(at=1.15, third.pl, vertical=T, method="jitter", pch=21, bg="white", add=T, jitter=0.05)
+	stripchart(at=1.35, third.pmg, vertical=T, method="jitter", pch=21, bg="black", add=T, jitter=0.05)
+	segments(x0=1.1, x1=1.2, y0=median(third.pl), lwd=3)
+	segments(x0=1.3, x1=1.4, y0=median(third.pmg), lwd=3)
+	
+	otu.labels <- gsub("Otu0{1,}", "OTU ", most.imp.otus)
+
+	axis(1, at=c(0.25, 0.75, 1.25), label=paste0(most.imp.taxa[1:3], "\n(", otu.labels, ")"), las=2, tick=F)
+	axis(2, at=seq(0,0.025, 0.005), label=format(seq(0,2.5, 0.5), digits=1), las=1)
+	
+	mtext(side=2, at=0.0152, line=2.5, cex=1.25, las=1, font=2, text="C")
+
+}
+
+figure2()
 ```
 
 We observed one (`r n.sig.tests`) OTU that was significantly different between the two species. This OTU affiliated among the unclassified members of the family _`r sig.taxon`_ (Figure 2C). Furthermore, among all of the OTUs, this OTU provided the greatest mean decrease in accuracy (MDA=`r format(most.imp.mda[[1]], digits=3)`) when we used the random forest machine-learning algorithm to distinguish between the _Peromyscus_ species. The next two OTUs which resulted in the greated mean decrease in accuracy were an OTU associated with the _`r most.imp.taxa[2]`_ and _`r most.imp.taxa[3]`_ (MDA=`r format(most.imp.mda[2], digits=3)` and `r format(most.imp.mda[3], digits=3)`, respectively). For the random forest feature selection procedure, we observed an out of bag error rate of `r format(oob.error, digits=3)`% suggesting that it was not possible to reliably use these OTUs to correctly classify the communities found in the two species of mice. Thus there was a lack of clear support for a differentiation in specific members of the _Peromyscus_ species’ microbiotas that parallels that of their host species.
