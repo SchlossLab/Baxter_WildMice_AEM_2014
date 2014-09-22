@@ -348,6 +348,8 @@ mothur "#
 	summary.single(shared=current, subsample=4463, calc=sobs-shannon-nseqs, iters=100)
 	dist.shared(shared=current, calc=thetayc, subsample=4463, iters=100, output=square, processors=8)
 	
+	summary.single(shared=16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pds.wang.pick.tx.shared, subsample=4463, calc=sobs, iters=100)
+
 	unifrac.weighted(tree=16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.phylip.tre, count=16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.uchime.pick.pick.count_table, distance=square, subsample=4463, iters=100)
 	phylo.diversity(tree=current, count=current, iters=100, rarefy=T)
 
@@ -360,21 +362,21 @@ mothur "#
 
 ```{r}
 
-# alpha diversity analysis
-alpha <- read.table(file="16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.an.unique_list.0.03.subsample.groups.ave-std.summary", header=T)
-alpha <- alpha[alpha$method=="ave",]
-rownames(alpha) <- gsub("_16S", "", alpha$group)
-o <- order(rownames(alpha))
-alpha <- alpha[o,]
-alpha <- alpha[,-c(1,2,3)]
+# otu.alpha diversity analysis
+otu.alpha <- read.table(file="16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.an.unique_list.0.03.subsample.groups.ave-std.summary", header=T)
+otu.alpha <- otu.alpha[otu.alpha$method=="ave",]
+rownames(otu.alpha) <- gsub("_16S", "", otu.alpha$group)
+o <- order(rownames(otu.alpha))
+otu.alpha <- otu.alpha[o,]
+otu.alpha <- otu.alpha[,-c(1,2,3)]
 
-stopifnot(sum(rownames(md)!=rownames(alpha)) == 0)	#make sure everything is in the same order
+stopifnot(sum(rownames(md)!=rownames(otu.alpha)) == 0)	#make sure everything is in the same order
 
-sobs.anova <- summary(aov(rank(alpha$sobs) ~ md$SP*md$Sex + Error(md$ET)))
-summary(aov(rank(alpha$sobs) ~ md$SP*md$Sex + Error(md$ET)))
+sobs.anova <- summary(aov(rank(otu.alpha$sobs) ~ md$SP*md$Sex + Error(md$ET)))
+summary(aov(rank(otu.alpha$sobs) ~ md$SP*md$Sex + Error(md$ET)))
 
-shannon.anova <- summary(aov(rank(alpha$shannon) ~ md$SP*md$Sex + Error(md$ET)))
-summary(aov(rank(alpha$shannon) ~ md$SP*md$Sex + Error(md$ET)))
+shannon.anova <- summary(aov(rank(otu.alpha$shannon) ~ md$SP*md$Sex + Error(md$ET)))
+summary(aov(rank(otu.alpha$shannon) ~ md$SP*md$Sex + Error(md$ET)))
 
 
 pd <- read.table(file="16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.phylip.1.phylodiv.rarefaction", header=T, row.names=1)
@@ -488,8 +490,8 @@ figure2 <- function(){
 	
 
 	# panel A
-	pl.shannon <- aggregate(alpha$shannon[md$SP=="PL"], by=list(md$ET[md$SP=="PL"]), median)$x
-	pmg.shannon <- aggregate(alpha$shannon[md$SP=="PMG"], by=list(md$ET[md$SP=="PMG"]), median)$x
+	pl.shannon <- aggregate(otu.alpha$shannon[md$SP=="PL"], by=list(md$ET[md$SP=="PL"]), median)$x
+	pmg.shannon <- aggregate(otu.alpha$shannon[md$SP=="PMG"], by=list(md$ET[md$SP=="PMG"]), median)$x
 	med.pl <- median(pl.shannon)
 	med.pmg <- median(pmg.shannon)
 
@@ -502,8 +504,8 @@ figure2 <- function(){
 	axis(2, las=2)
 	mtext(side=2, at=4.8, line=2.5, cex=1.25, las=1, font=2, text="A")
 
-	pl.sobs <- aggregate(alpha$sobs[md$SP=="PL"], by=list(md$ET[md$SP=="PL"]), median)$x
-	pmg.sobs <- aggregate(alpha$sobs[md$SP=="PMG"], by=list(md$ET[md$SP=="PMG"]), median)$x
+	pl.sobs <- aggregate(otu.alpha$sobs[md$SP=="PL"], by=list(md$ET[md$SP=="PL"]), median)$x
+	pmg.sobs <- aggregate(otu.alpha$sobs[md$SP=="PMG"], by=list(md$ET[md$SP=="PMG"]), median)$x
 	med.pl <- median(pl.sobs)
 	med.pmg <- median(pmg.sobs)
 
@@ -636,7 +638,7 @@ We observed one (`r n.sig.tests`) OTU that was significantly different between t
 
 ```{r}
 total.n.otus <- ncol(otu.subsampled)
-otu.distribution <- quantile(alpha$sobs, c(0.025, 0.50, 0.975))
+otu.distribution <- quantile(otu.alpha$sobs, c(0.025, 0.50, 0.975))
 present90 <- apply(otu.subsampled>0, 2, sum) >= 0.90*nrow(otu.subsampled)
 notus.present90 <- sum(apply(otu.subsampled>0, 2, sum) >= 0.90*nrow(otu.subsampled))
 otu.present90 <- colnames(otu.subsampled)[present90]
@@ -645,10 +647,35 @@ otu.percent.present90 <- 100 * sum(otu.subsampled[,present90])/sum(otu.subsample
 notus.presentAll <- sum(apply(otu.subsampled>0, 2, sum) == nrow(otu.subsampled))
 
 
+phylo.subsampled <-read.table(file="16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pds.wang.pick.tx.1.subsample.shared", header=T, row.names=2)
+phylo.subsampled <- phylo.subsampled[,-c(1,2)]
+rownames(phylo.subsampled) <- gsub("_16S", "", rownames(phylo.subsampled))
+o <- order(rownames(phylo.subsampled))
+phylo.subsampled <- phylo.subsampled[o,]
+
+phylo.alpha <- read.table(file="16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pds.wang.pick.tx.groups.ave-std.summary", header=T)
+phylo.alpha <- phylo.alpha[phylo.alpha$method=="ave",]
+rownames(phylo.alpha) <- gsub("_16S", "", phylo.alpha$group)
+o <- order(rownames(phylo.alpha))
+phylo.alpha <- phylo.alpha[o,]
+
+total.n.phylos <- ncol(phylo.subsampled)
+phylo.distribution <- quantile(phylo.alpha$sobs, c(0.025, 0.50, 0.975))
+present90 <- apply(phylo.subsampled>0, 2, sum) >= 0.90*nrow(phylo.subsampled)
+presentAll <- apply(phylo.subsampled>0, 2, sum) == nrow(phylo.subsampled)
+nphylo.present90 <- sum(apply(phylo.subsampled>0, 2, sum) >= 0.90*nrow(phylo.subsampled))
+phylo.present90 <- colnames(phylo.subsampled)[present90]
+phylo_names.present90 <- levels(factor(taxa[phylo.present90]))
+phylo.percent.present90 <- 100 * sum(phylo.subsampled[,present90])/sum(phylo.subsampled)
+nphylo.presentAll <- sum(apply(phylo.subsampled>0, 2, sum) == nrow(phylo.subsampled))
+phylo.percent.presentAll <- 100 * sum(phylo.subsampled[,presentAll])/sum(phylo.subsampled)
+
 
 ```
 
-One striking feature of the communities observed between the mice was the large amount of variation in the composition of their gut microbiota. We observed a total of `r total.n.otus` OTUs among all of the mice; however, the median number of OTUs observed in each mouse was `r otu.distribution["50%"]` (95% confidence interval=`r otu.distribution["2.5%"]`-`r otu.distribution["97.5%"]`). Across all of the OTUs, no (`r notus.presentAll`) OTUs were present in every sample, but `r notus.present90` were observed in at least 90% of the mice (Figure 3A). These OTUs affiliated with `r length(otu_names.present90)` different taxa and represented `r format(otu.percent.present90, digits=3)`% of all of the 16S rRNA gene sequences sampled from the mice (Figure 3A). These OTUs did not overlap with the two OTUs that were identified as being significantly different between the two species of mice. We next considered the taxonomic diversity of bacterial genera (N=`r length(intersect(most.imp.otus, otu.present90))`). Among the 475 genera that were observed, 28 were observed in at least 90% of the mice and 12 were observed in every mouse sampled (Figure 3B). Those genera found in at least 90% of the mice represented 87% of all sequences sampled and those found in every animal represented 75% of all sequences sampled. Within each animal we identified the dominant genus and observed that Lactobacillus was the dominant genus in 39% of the mice followed by Lachnospiraceae (27%) and Porphyromonadaceae (16%). These results demonstrate that among the Peromyscus spp. animals that we sampled, there was a conserved taxonomic core.
+One striking feature of the communities observed between the mice was the large amount of variation in the composition of their gut microbiota. We observed a total of `r total.n.otus` OTUs among all of the mice; however, the median number of OTUs observed in each mouse was `r otu.distribution["50%"]` (95% confidence interval=`r otu.distribution["2.5%"]`-`r otu.distribution["97.5%"]`). Across all of the OTUs, no (`r notus.presentAll`) OTUs were present in every sample, but `r notus.present90` were observed in at least 90% of the mice (Figure 3A). These OTUs affiliated with `r length(otu_names.present90)` different taxa and represented `r format(otu.percent.present90, digits=3)`% of all of the 16S rRNA gene sequences sampled from the mice (Figure 3A). These OTUs did not overlap with the two OTUs that were identified as being significantly different between the two species of mice. We next considered the taxonomic diversity of bacterial genera (N=`r length(intersect(most.imp.otus, otu.present90))`). 
+
+Among the `r total.n.phylos` genera that were observed, `r nphylo.present90` were observed in at least 90% of the mice and `r nphylo.presentAll` were observed in every mouse sampled (Figure 3B). Those genera found in at least 90% of the mice represented `r format(phylo.percent.present90, digits=3)`% of all sequences sampled and those found in every animal represented `r format(phylo.percent.presentAll, digits=3)`% of all sequences sampled. Within each animal we identified the dominant genus and observed that _Lactobacillus_ was the dominant genus in 39% of the mice followed by _Lachnospiraceae_ (27%) and _Porphyromonadaceae_ (16%). These results demonstrate that among the Peromyscus spp. animals that we sampled, there was a conserved taxonomic core.
 
 
 ### Effects of host physiology on diversity and richness
