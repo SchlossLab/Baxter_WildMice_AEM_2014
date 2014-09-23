@@ -668,19 +668,90 @@ phylo.taxa <- gsub("^.*;", "", phylo.taxa)
 names(phylo.taxa) <- rownames(cons.tax)
 
 total.n.phylos <- ncol(phylo.subsampled)
-phylo.distribution <- quantile(phylo.alpha$sobs, c(0.025, 0.50, 0.975))
+#phylo.distribution <- quantile(phylo.alpha$sobs, c(0.025, 0.50, 0.975))
 present90 <- apply(phylo.subsampled>0, 2, sum) >= 0.90*nrow(phylo.subsampled)
-presentAll <- apply(phylo.subsampled>0, 2, sum) == nrow(phylo.subsampled)
 nphylo.present90 <- sum(apply(phylo.subsampled>0, 2, sum) >= 0.90*nrow(phylo.subsampled))
-phylo.present90 <- colnames(phylo.subsampled)[present90]
-phylo_names.present90 <- levels(factor(phylo.taxa[phylo.present90]))
+#phylo.present90 <- colnames(phylo.subsampled)[present90]
+#phylo_names.present90 <- levels(factor(phylo.taxa[phylo.present90]))
 phylo.percent.present90 <- 100 * sum(phylo.subsampled[,present90])/sum(phylo.subsampled)
-nphylo.presentAll <- sum(apply(phylo.subsampled>0, 2, sum) == nrow(phylo.subsampled))
+
+presentAll <- apply(phylo.subsampled>0, 2, sum) == nrow(phylo.subsampled)
+nphylo.presentAll <- sum(presentAll)
 phylo.percent.presentAll <- 100 * sum(phylo.subsampled[,presentAll])/sum(phylo.subsampled)
 
 dominant.phylo <- colnames(phylo.subsampled)[apply(phylo.subsampled, 1, which.max)]
 percent.dominant <- 100*sort(table(dominant.phylo), decreasing=T)/length(dominant.phylo)
 names.dominant <- phylo.taxa[names(percent.dominant)]
+```
+
+```{r figure3, tidy=TRUE, fig.width=8.5, fig.height=6}
+#convert the otu count data into relative abundances
+otu.relabund <- otu.subsampled / nseqs
+
+#get the median relative abundance for each otu across observations of that ear tag
+otu.med <- aggregate(otu.relabund, by=list(md$ET), median)
+otu.et <- otu.med$Group.1 #and format the table
+otu.med <- otu.med[,-1]
+
+#get the most commonly observed OTUs across all of the mice
+otu.freq <- sort(apply(otu.med>0, 2, sum)/nrow(otu.med), decreasing =T)[1:27]
+most.common <- names(otu.freq)	#names of the most common OTUs
+otu.mc_med <- otu.med[,most.common]	#the relabund data sorted by frequency observed
+
+#get the median relative abundance for each otu and then sort the OTUs by the median values
+mc.median <- apply(otu.mc_med , 2, median)
+o <- order(mc.median, decreasing=F)
+otu.mc_med <- otu.mc_med[,o]	#sorted relabund table by median relative abundance
+otu.mc.medians <- mc.median[o] 	#sorted median relative abundances
+otu.mc_med[otu.mc_med ==0] <- 1e-4 #set relabund of missing bugs to arbitrarily small number
+
+
+
+
+#convert the phylotype count data into relative abundances
+phylo.relabund <- phylo.subsampled / nseqs
+
+#get the median relative abundance for each phylotype across observations of that ear tag
+phylo.med <- aggregate(phylo.relabund, by=list(md$ET), median)
+phylo.et <- phylo.med$Group.1 #and format the table
+phylo.med <- phylo.med[,-1]
+
+#get the most commonly observed OTUs across all of the mice
+phylo.freq <- sort(apply(phylo.med>0, 2, sum)/nrow(phylo.med), decreasing =T)[1:27]
+most.common <- names(phylo.freq)	#names of the most common OTUs
+phylo.mc_med <- phylo.med[,most.common]	#the relabund data sorted by frequency observed
+
+#get the median relative abundance for each phylotype and then sort the phylotypes by the median values
+mc.median <- apply(phylo.mc_med , 2, median)
+o <- order(mc.median, decreasing=F)
+phylo.mc_med <- phylo.mc_med[,o]	#sorted relabund table by median relative abundance
+phylo.mc.medians <- mc.median[o] 	#sorted median relative abundances
+phylo.mc_med[phylo.mc_med ==0] <- 1e-4 #set relabund of missing bugs to arbitrarily small number
+
+#we want a two panel figure with a left and right panel
+par(mfrow=c(1,2))
+
+par(mar=c(5, 8, 0.5, 0.5))
+plot(1, ylim=c(0.9,length(otu.mc.medians)+0.1), xlim=c(1e-4, 1), log="x", type="n", xlab="Median relative abundance\nof most common OTUs (%)", ylab="", xaxt="n", yaxt="n")
+for(i in 1:length(otu.mc.medians)){
+	stripchart(at=i, otu.mc_med[,i], method="jitter", jitter=0.2, pch=19, add=T, cex=0.5, col="gray")
+	segments(y0=i-0.3, y1=i+0.3, x0=otu.mc.medians[i], lwd=3, col="black")
+}
+axis(1, at=c(1e-4, 1e-3, 1e-2, 1e-1, 1), label=c("0", "0.1", "1", "10", "100"))
+axis(2, at=seq(length(otu.mc.medians):1), label=gsub("_", " ", otu.taxa[colnames(otu.mc_med)]), las=1, tick=F, cex.axis=0.8, font=3)
+text(x=0.8, y=length(otu.mc.medians), label="A", cex=2, font=2)
+
+
+par(mar=c(5, 8, 0.5, 0.5))
+plot(1, ylim=c(0.9,length(phylo.mc.medians)+0.1), xlim=c(1e-4, 1), log="x", type="n", xlab="Median relative abundance\nof most common taxon (%)", ylab="", xaxt="n", yaxt="n")
+for(i in 1:length(phylo.mc.medians)){
+	stripchart(at=i, phylo.mc_med[,i], method="jitter", jitter=0.2, pch=19, add=T, cex=0.5, col="gray")
+	segments(y0=i-0.3, y1=i+0.3, x0=phylo.mc.medians[i], lwd=3, col="black")
+}
+axis(1, at=c(1e-4, 1e-3, 1e-2, 1e-1, 1), label=c("0", "0.1", "1", "10", "100"))
+axis(2, at=seq(length(phylo.mc.medians):1), label=gsub("_", " ", phylo.taxa[colnames(phylo.mc_med)]), las=1, tick=F, cex.axis=0.8, font=3)
+text(x=0.8, y=length(phylo.mc.medians), label="B", cex=2, font=2)
+
 ```
 
 One striking feature of the communities observed between the mice was the large amount of variation in the composition of their gut microbiota. We observed a total of `r total.n.otus` OTUs among all of the mice; however, the median number of OTUs observed in each mouse was `r otu.distribution["50%"]` (95% confidence interval=`r otu.distribution["2.5%"]`-`r otu.distribution["97.5%"]`). Across all of the OTUs, no (`r notus.presentAll`) OTUs were present in every sample, but `r notus.present90` were observed in at least 90% of the mice (Figure 3A). These OTUs affiliated with `r length(otu_names.present90)` different taxa and represented `r format(otu.percent.present90, digits=3)`% of all of the 16S rRNA gene sequences sampled from the mice (Figure 3A). These OTUs did not overlap with the two OTUs that were identified as being significantly different between the two species of mice. We next considered the taxonomic diversity of bacterial genera (N=`r length(intersect(most.imp.otus, otu.present90))`). Among the `r total.n.phylos` genera that were observed, `r nphylo.present90` were observed in at least 90% of the mice and `r nphylo.presentAll` were observed in every mouse sampled (Figure 3B). Those genera found in at least 90% of the mice represented `r format(phylo.percent.present90, digits=3)`% of all sequences sampled and those found in every animal represented `r format(phylo.percent.presentAll, digits=3)`% of all sequences sampled. Within each animal we identified the dominant genus and observed that _`r names.dominant[1]`_ was the dominant genus in `r format(percent.dominant[1], digits=3)`% of the mice followed by _`r names.dominant[2]`_ (`r format(percent.dominant[2], digits=3)`%) and _`r names.dominant[3]`_ (`r format(percent.dominant[3], digits=3)`%). These results demonstrate that among the _Peromyscus_ spp. animals that we sampled, there was a conserved taxonomic core.
