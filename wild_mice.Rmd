@@ -741,7 +741,6 @@ axis(1, at=c(1e-4, 1e-3, 1e-2, 1e-1, 1), label=c("0", "0.1", "1", "10", "100"))
 axis(2, at=seq(length(otu.mc.medians):1), label=gsub("_", " ", otu.taxa[colnames(otu.mc_med)]), las=1, tick=F, cex.axis=0.8, font=3)
 text(x=0.8, y=length(otu.mc.medians), label="A", cex=2, font=2)
 
-
 par(mar=c(5, 8, 0.5, 0.5))
 plot(1, ylim=c(0.9,length(phylo.mc.medians)+0.1), xlim=c(1e-4, 1), log="x", type="n", xlab="Median relative abundance\nof most common taxon (%)", ylab="", xaxt="n", yaxt="n")
 for(i in 1:length(phylo.mc.medians)){
@@ -751,7 +750,6 @@ for(i in 1:length(phylo.mc.medians)){
 axis(1, at=c(1e-4, 1e-3, 1e-2, 1e-1, 1), label=c("0", "0.1", "1", "10", "100"))
 axis(2, at=seq(length(phylo.mc.medians):1), label=gsub("_", " ", phylo.taxa[colnames(phylo.mc_med)]), las=1, tick=F, cex.axis=0.8, font=3)
 text(x=0.8, y=length(phylo.mc.medians), label="B", cex=2, font=2)
-
 ```
 
 One striking feature of the communities observed between the mice was the large amount of variation in the composition of their gut microbiota. We observed a total of `r total.n.otus` OTUs among all of the mice; however, the median number of OTUs observed in each mouse was `r otu.distribution["50%"]` (95% confidence interval=`r otu.distribution["2.5%"]`-`r otu.distribution["97.5%"]`). Across all of the OTUs, `r notus.presentAll` OTUs were present in every sample, but `r notus.present90` were observed in at least 90% of the mice (Figure 3A). These OTUs affiliated with `r length(otu_names.present90)` different taxa and represented `r format(otu.percent.present90, digits=3)`% of all of the 16S rRNA gene sequences sampled from the mice (Figure 3A). These OTUs did not overlap with the two OTUs that were identified as being significantly different between the two species of mice (N=`r length(intersect(most.imp.otus, otu.present90))`). We next considered the taxonomic diversity of bacterial genera. Among the `r total.n.phylos` genera that were observed, `r nphylo.present90` were observed in at least 90% of the mice and `r nphylo.presentAll` were observed in every mouse sampled (Figure 3B). Those genera found in at least 90% of the mice represented `r format(phylo.percent.present90, digits=3)`% of all sequences sampled and those found in every animal represented `r format(phylo.percent.presentAll, digits=3)`% of all sequences sampled. Within each animal we identified the dominant genus and observed that _`r names.dominant[1]`_ was the dominant genus in `r format(percent.dominant[1], digits=3)`% of the mice followed by _`r names.dominant[2]`_ (`r format(percent.dominant[2], digits=3)`%) and _`r names.dominant[3]`_ (`r format(percent.dominant[3], digits=3)`%). These results demonstrate that among the _Peromyscus_ spp. animals that we sampled, there was a conserved taxonomic core.
