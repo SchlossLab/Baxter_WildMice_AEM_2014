@@ -637,6 +637,7 @@ figure2()
 We observed one (`r n.sig.tests`) OTU that was significantly different between the two species. This OTU affiliated among the unclassified members of the family _`r sig.taxon`_ (Figure 2C). Furthermore, among all of the OTUs, this OTU provided the greatest mean decrease in accuracy (MDA=`r format(most.imp.mda[[1]], digits=3)`) when we used the random forest machine-learning algorithm to distinguish between the _Peromyscus_ species. The next two OTUs which resulted in the greated mean decrease in accuracy were an OTU associated with the _`r most.imp.taxa[2]`_ and _`r most.imp.taxa[3]`_ (MDA=`r format(most.imp.mda[2], digits=3)` and `r format(most.imp.mda[3], digits=3)`, respectively). For the random forest feature selection procedure, we observed an out of bag error rate of `r format(oob.error, digits=3)`% suggesting that it was not possible to reliably use these OTUs to correctly classify the communities found in the two species of mice. Thus there was a lack of clear support for a differentiation in specific members of the _Peromyscus_ species’ microbiotas that parallels that of their host species.
 
 ```{r}
+##OTU-based data
 #convert the otu count data into relative abundances
 otu.relabund <- otu.subsampled / nseqs
 
@@ -645,16 +646,17 @@ otu.med <- aggregate(otu.relabund, by=list(md$ET), median)
 otu.et <- otu.med$Group.1 #and format the table
 otu.med <- otu.med[,-1]
 
-total.n.otus <- ncol(otu.med)
-otu.distribution <- quantile(otu.alpha$sobs, c(0.025, 0.50, 0.975))
-present90 <- apply(otu.med>0, 2, sum) >= 0.90*nrow(otu.med)
-notus.present90 <- sum(present90)
-otu.present90 <- colnames(otu.med)[present90]
-otu_names.present90 <- levels(factor(otu.taxa[otu.present90]))
-otu.percent.present90 <- 100 * sum(otu.med[,present90])/nrow(otu.med)
-notus.presentAll <- sum(apply(otu.med>0, 2, sum) == nrow(otu.med))
+total.n.otus <- ncol(otu.med)  #total number of OTUs across all samples
+otu.distribution <- quantile(otu.alpha$sobs, c(0.025, 0.50, 0.975))  #95% CI for Sobs
+present90 <- apply(otu.med>0, 2, sum) >= 0.90*nrow(otu.med) #T/F for OTUs in 90% of ear tags
+notus.present90 <- sum(present90) #number of OTUs in 90% of ear tags
+otu.present90 <- colnames(otu.med)[present90] #what are the OTUs in 90% of ear tags?
+otu_names.present90 <- levels(factor(otu.taxa[otu.present90])) #what taxa are represented?
+otu.percent.present90 <- 100 * sum(otu.med[,present90])/nrow(otu.med) #what % of seqs do they represent?
+notus.presentAll <- sum(apply(otu.med>0, 2, sum) == nrow(otu.med)) #how many OTUs were found in all eartags?
 
 
+##Phylotype-based data
 phylo.subsampled <-read.table(file="16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pds.wang.pick.tx.1.subsample.shared", header=T, row.names=2)
 phylo.subsampled <- phylo.subsampled[,-c(1,2)]
 rownames(phylo.subsampled) <- gsub("_16S", "", rownames(phylo.subsampled))
@@ -669,13 +671,14 @@ phylo.med <- aggregate(phylo.relabund, by=list(md$ET), median)
 phylo.et <- phylo.med$Group.1 #and format the table
 phylo.med <- phylo.med[,-1]
 
-
+#get the phylotype alpha diversity information
 phylo.alpha <- read.table(file="16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pds.wang.pick.tx.groups.ave-std.summary", header=T)
 phylo.alpha <- phylo.alpha[phylo.alpha$method=="ave",]
 rownames(phylo.alpha) <- gsub("_16S", "", phylo.alpha$group)
 o <- order(rownames(phylo.alpha))
 phylo.alpha <- phylo.alpha[o,]
 
+#get the classification data for the phylotypes
 cons.tax <- read.table(file="16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pds.wang.pick.tx.1.cons.taxonomy", header=TRUE, row.names=1)
 phylo.taxa <- gsub("\\(\\d*\\)", "", cons.tax[,"Taxonomy"])
 phylo.taxa <- gsub('\"', "", phylo.taxa)
@@ -684,16 +687,17 @@ phylo.taxa <- gsub(";$", "", phylo.taxa)
 phylo.taxa <- gsub("^.*;", "", phylo.taxa)
 names(phylo.taxa) <- rownames(cons.tax)
 
-total.n.phylos <- ncol(phylo.subsampled)
-present90 <- apply(phylo.med>0, 2, sum) >= 0.90*nrow(phylo.med)
-nphylo.present90 <- sum(apply(phylo.med>0, 2, sum) >= 0.90*nrow(phylo.med))
-phylo.percent.present90 <- 100 * sum(phylo.med[,present90])/sum(phylo.med)
+total.n.phylos <- ncol(phylo.subsampled) #total number of phylotypes observed
+present90 <- apply(phylo.med>0, 2, sum) >= 0.90*nrow(phylo.med)  #T/F of those in 90% of ear tags
+nphylo.present90 <- sum(apply(phylo.med>0, 2, sum) >= 0.90*nrow(phylo.med)) #number in more than 90%
+phylo.percent.present90 <- 100 * sum(phylo.med[,present90])/sum(phylo.med) #% of reads represented
 
-presentAll <- apply(phylo.med>0, 2, sum) == nrow(phylo.med)
-nphylo.presentAll <- sum(presentAll)
-phylo.percent.presentAll <- 100 * sum(phylo.med[,presentAll])/sum(phylo.med)
+presentAll <- apply(phylo.med>0, 2, sum) == nrow(phylo.med) #T/F of those in all ear tags
+nphylo.presentAll <- sum(presentAll)  #number of OTUs in all ear tags
+phylo.percent.presentAll <- 100 * sum(phylo.med[,presentAll])/sum(phylo.med) #what % of reads rep'd
 
-dominant.phylo <- colnames(phylo.med)[apply(phylo.med, 1, which.max)]
+#find the most abundant phylotype in each OTU and store its name
+dominant.phylo <- colnames(phylo.med)[apply(phylo.med, 1, which.max)] 
 percent.dominant <- 100*sort(table(dominant.phylo), decreasing=T)/length(dominant.phylo)
 names.dominant <- phylo.taxa[names(percent.dominant)]
 ```
