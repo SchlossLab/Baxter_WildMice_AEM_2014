@@ -793,8 +793,6 @@ sm.pd
 # md.sex.mature$Sex  1    233   233.3   1.185  0.282
 # Residuals         45   8861   196.9               
 
-
-
 thetayc.sm <- as.matrix(thetayc)
 thetayc.sm <- as.dist(thetayc.sm[sex.mature,sex.mature])
 
@@ -812,8 +810,10 @@ sm.weighted <- as.dist(sm.weighted[sex.mature,sex.mature])
 sm.sex.weighted <- adonis(sm.weighted~md.sex.mature$Sex, perm=1e4)
 sm.sex.weighted
 
-
-
+#                   Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)
+# md.sex.mature$Sex  1    0.0482 0.04820 0.65516 0.01404 0.8312
+# Residuals         46    3.3842 0.07357         0.98596       
+# Total             47    3.4324                 1.00000       
 
 
 n.age <- table(md$Age)
@@ -840,12 +840,30 @@ pd.age
 #Residuals 107 109871  1026.8               
 
 spearman.wt.shannon <- cor.test(md$Weight, otu.alpha$shannon, method="spearman")
+spearman.wt.shannon
+
+# data:  md$Weight and otu.alpha$shannon
+# S = 156014.7, p-value = 0.0007441
+# alternative hypothesis: true rho is not equal to 0
+# sample estimates:
+#       rho 
+# 0.3154849 
 
 age.thetayc <- adonis(thetayc~md$Age, strata=md$ET, perm=1e4)
 age.thetayc
 
+#            Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)
+# md$Age      2     0.765 0.38236  1.0276 0.01867 0.6267
+# Residuals 108    40.186 0.37209         0.98133       
+# Total     110    40.951                 1.00000       
+
 age.weighted <- adonis(weighted~md$Age, strata=md$ET, perm=1e4)
 age.weighted
+
+#            Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)
+# md$Age      2    0.2075 0.10376  1.3638 0.02463  0.265
+# Residuals 108    8.2166 0.07608         0.97537       
+# Total     110    8.4241                 1.00000       
 
 ```
 
@@ -857,7 +875,6 @@ def.par <- par(no.readonly = TRUE)
 l <- layout(matrix(c(	1,4,
 						2,4,
 						3,4
-						
 						), nrow=3, byrow=T),height=c(3.5,3.5,6.25), width=c(3,4))
 
 j.shannon <- aggregate(otu.alpha$shannon[md$Age=="J"], by=list(md$ET[md$Age=="J"]), median)
@@ -867,6 +884,7 @@ med.j <- median(j.shannon$x)
 med.sa <- median(sa.shannon$x)
 med.a <- median(a.shannon$x)
 
+#Panel A1
 par(mar=c(0, 5, 0.5, 0.5))
 stripchart(at=0.2, j.shannon$x, vertical=T, method="jitter", jitter=0.08, ylim=c(0,5), ylab="Shannon\ndiversity", xlab="", xaxt="n",  yaxt="n", bg=bg.color[md[j.shannon$Group.1,"SP"]], pch=21, xlim=c(0,1))
 stripchart(at=0.5, sa.shannon$x, vertical=T, method="jitter", jitter=0.08, xlab="", xaxt="n", yaxt="n", bg=bg.color[md[sa.shannon$Group.1,"SP"]], pch=21, add=T)
@@ -885,6 +903,7 @@ med.j <- median(j.sobs$x)
 med.sa <- median(sa.sobs$x)
 med.a <- median(a.sobs$x)
 
+#Panel A2
 par(mar=c(0, 5, 0.5, 0.5))
 stripchart(at=0.2, j.sobs$x, vertical=T, method="jitter", jitter=0.08, ylim=c(0,400), ylab="Number of OTUs\nobserved", xlab="", xaxt="n",  yaxt="n",  bg=bg.color[md[sa.sobs$Group.1,"SP"]], pch=21, xlim=c(0,1))
 stripchart(at=0.5, sa.sobs$x, vertical=T, method="jitter", jitter=0.08, xlab="", xaxt="n", yaxt="n",  bg=bg.color[md[sa.sobs$Group.1,"SP"]], pch=21, add=T)
@@ -902,6 +921,7 @@ med.j <- median(j.pd.values$x)
 med.sa <- median(sa.pd.values$x)
 med.a <- median(a.pd.values$x)
 
+#Panel A3
 par(mar=c(6, 5, 0.5, 0.5))
 stripchart(at=0.2, j.pd.values$x, vertical=T, method="jitter", jitter=0.08, ylim=c(0,18), ylab="Phylogenetic\ndiversity", xlab="", xaxt="n",  yaxt="n",  bg=bg.color[md[sa.pd.values$Group.1,"SP"]], pch=21, xlim=c(0,1))
 stripchart(at=0.5, sa.pd.values$x, vertical=T, method="jitter", jitter=0.08, xlab="", xaxt="n", yaxt="n",  bg=bg.color[md[sa.pd.values$Group.1,"SP"]], pch=21, add=T)
@@ -913,7 +933,7 @@ segments(x0=0.7, x1=0.9, y0=med.a, lwd=3)
 axis(2, las=2)
 axis(1, at=c(0.2,0.5,0.8), label=c("Juvenile", "Adolescent", "Adult"), las=2, tick=F)
 
-
+#Panel B
 par(mar=c(5, 5, 0.5, 0.5))
 plot(otu.alpha$shannon~md$Weight, pch=21, xlab="Weight (g)", ylab="Shannon diversity", ylim=c(0,5), xlim=c(4,28),  bg=bg.color[md$SP])
 mtext(side=2, at=5.14, las=1, line=3, text="B", cex=1.25, font=2)
