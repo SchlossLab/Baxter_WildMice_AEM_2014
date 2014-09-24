@@ -1011,14 +1011,14 @@ diet.species.adonis
 
 
 theta.food <- as.matrix(thetayc)[m.food,m.food]
-theta.food.mantel <- mantel(theta.food, food, method="spearman", permutations=1e4)
+theta.food.mantel <- mantel(theta.food, food, method="spearman", permutations=perm)
 theta.food.mantel
 # Mantel statistic r: 0.09349 
 #       Significance: 0.068893 
 
 
 weighted.food <- as.matrix(weighted)[m.food,m.food]
-weighted.food.mantel <- mantel(weighted.food, food, method="spearman", permutations=1e4)
+weighted.food.mantel <- mantel(weighted.food, food, method="spearman", permutations=perm)
 weighted.food.mantel
 # Mantel statistic r: 0.09022 
 #       Significance: 0.094391 
@@ -1084,7 +1084,7 @@ weighted.dmm.adonis <- adonis(weighted.food~food.dmm.design$V2, strata=factor(m.
 
 
 #run random forest
-data.rf <- randomForest(x=bact.fb, y=food.dmm.design$V2, importance=TRUE, proximity=TRUE, ntree=1e4) 
+data.rf <- randomForest(x=as.matrix(bact.fb), y=factor(food.dmm.design$V2), importance=TRUE, proximity=TRUE, ntree=perm) 
 
 confusion <- data.rf$confusion[,1:2]
 oob.error <- (confusion[1,2]+confusion[2,1])/sum(confusion)*100
@@ -1093,6 +1093,157 @@ oob.error <- (confusion[1,2]+confusion[2,1])/sum(confusion)*100
 To further characterize the relationship between diet and the microbiota, we attempted to correlate the relative abundance of OTUs that were found in more than half of the samples with the relative abundance of dietary components that appeared in more than half of the samples. We were unable to detect any Spearman correlation coefficients that had a P-value below 0.001 (N=`r n.sig.cor`). Next, we used DMM models to identify clusters within the diet data. This approach identified two clusters (N=`r dmm.count`), which included a cluster of samples dominated by plant material (n=50) and a cluster of samples with a more diverse mixture of plants, arthropods, and fungi (n=37). When we used these clusters to test for an association within the community structure distance matrix between the microbiotas of the mice, we did not observe a significant effect of diet on community structure (AMOVA; P~θ~=`r round(theta.dmm.adonis$aov.tab$"Pr(>F)"[1], digits=2)`; P~W~=`r round(weighted.dmm.adonis$aov.tab$"Pr(>F)"[1], digits=2)`). We then used the random forest algorithm to identify features in the microbiota that could distinguish the two dietary groups; however, the out of bag error rate was `r round(oob.error, digits=1)`%, which indicates that it was unable to correctly classify the samples. As these analyses demonstrate, we were unable to find associations between specific members of the microbiota and the dietary contents of each sample. This confirms our observation that the weak association between the distances between the microbiota and diet structures was unlikely to be biologically relevant.
 
 ### A transient microbiota
-A striking characteristic of the microbiotas characterized in this study was the high intra- and inter-individual variation. Studies in other animals have observed less variation in microbiota structure within an individual over time than between individuals. We sought to determine whether non-domesticated animals also harbored personalized microbiotas. To investigate this in _Peromyscus_ spp. we took advantage of the ability to catch and release the same animal multiple times. Using the OTU-based approach the median intra-individual distance was significantly less than the median inter-individual distance (Wilcoxon paired test; P~θ~=0.002); however, using the weighted UniFrac-based approach the difference was not significant (P~W~=0.22). Within the OTU-based analysis, there was wide variation in the intra-animal distances and the difference in the median intra- and inter-animal distances was small (difference=0.06; Figure 5A). To investigate this further, we calculated the number of days that elapsed between recapturing events and created five time-windows such that each window had approximately the same number of mice that were recaptured within that time period (i.e. 1-3 [N=30], 4-11 [N=22], 12-14 [N=24], 15-19 [N=21], and >20 days [N=24] apart). We then compared the intra-animal distances within these time periods to the inter-animal distances of different mice captured within the same intervals. Surprisingly, only the mice captured between 1 and 3 days apart were more similar to themselves than to other mice (Figure 5B; Wilcoxon Test; P=0.001). In none of the other time windows was there a significant difference between samples collected from the same animal and the samples collected from different animals (all P>0.12). These results suggest that any individualization of an animal’s microbiota is quickly lost.
+```{r}
+getSameDifferent<-function(distance, metadata){
+	
+	distance <- as.matrix(distance)
+
+	same <- numeric()
+	different <- numeric()
+	same.et <- levels(factor(metadata[, "ET"]))
+	for(et in same.et){
+		sub.matrix <- distance[metadata$ET==et, metadata$ET==et]
+		if(length(sub.matrix) == 1){
+			same[et] <- NA
+		}else{
+			sub.matrix <- sub.matrix[lower.tri(sub.matrix)]
+			same[et] <- median(sub.matrix)
+		}
+	}
+	
+	different.et <- levels(factor(metadata[, "ET"]))
+	for(et in different.et){
+		sub.matrix <- distance[metadata$ET==et, metadata$ET!=et]
+		different[et] <- median(as.matrix(sub.matrix))
+	}
+	
+	return(list(same=same, different=different))
+}
+
+thetayc.same_different <- getSameDifferent(thetayc, md)
+thetayc.same_different.wilcox <- wilcox.test(thetayc.same_different$same, thetayc.same_different$different, paired=T, na.rm=T)
+# V = 80, p-value = 0.002152
+ 
+weighted.same_different <- getSameDifferent(weighted, md)
+weighted.same_different.wilcox <- wilcox.test(weighted.same_different$same, weighted.same_different$different, paired=T, na.rm=T)
+# V = 158, p-value = 0.2053
+
+dist.diff <- diff(unlist(lapply(thetayc.same_different, median, na.rm=T)))
+
+```
+
+```{r figure5, fig.width=9, fig.height=6}
+dup.et <- names(table(md$ET)[table(md$ET) > 1])
+
+date <- gsub("(\\d*)_(\\d*)", "\\1/\\2/88", md$Date)
+md$jdate <- as.numeric(as.date(date))-as.numeric(as.date("1/1/88"))+1
+
+time.within <- numeric()
+dist.within <- numeric()
+
+distance <- as.matrix(thetayc)
+
+for(et in dup.et){
+
+	m.et <- md[md$ET == et,]
+	samples <- rownames(m.et)
+	
+	for(s in samples){
+		for(t in samples){
+			if(s < t){
+				dist.within <- c(dist.within, distance[s,t])
+				time.within <- c(time.within, abs(m.et[s, "jdate"]-m.et[t, "jdate"]))
+			}
+		}
+	}
+}
+
+#add for distances between mice with different ear tags
+time.between <- numeric()
+dist.between <- numeric()
+
+samples <- rownames(md)
+for(s in samples){
+	for(t in samples){
+		if(s < t && md[s,"ET"] != md[t,"ET"]){
+			dist.between <- c(dist.between, distance[s,t])
+			time.between <- c(time.between, abs(md[s, "jdate"]-md[t, "jdate"]))
+		}
+	}
+}
+
+distro <- quantile(c(time.within,365), seq(0,1, 0.2))
+bins.within <- cut(time.within, distro, include.lowest=T)
+bins.between <- cut(time.between, distro, include.lowest=T)
+
+bins <- table(bins.within)
+
+bin.p.values <- numeric()
+A <- bins.within == "[1,3]"
+bin.p.values["A"] <- wilcox.test(dist.within[A], dist.between[A])$p.value
+
+B <- bins.within == "(3,11]"
+bin.p.values["B"] <- wilcox.test(dist.within[B], dist.between[B])$p.value
+
+C <- bins.within == "(11,14]"
+bin.p.values["C"] <- wilcox.test(dist.within[C], dist.between[C])$p.value
+
+D <- bins.within == "(14,19.8]"
+bin.p.values["D"] <- wilcox.test(dist.within[D], dist.between[D])$p.value
+
+E <- bins.within == "(19.8,365]"
+bin.p.values["E"] <- wilcox.test(dist.within[E], dist.between[E])$p.value
+
+
+median.within <- aggregate(dist.within, by=list(bins.within), median)$x
+median.between <- aggregate(dist.between, by=list(bins.between), median)$x
+se.within <- aggregate(dist.within, by=list(bins.within), function(x) sd(x)/sqrt(length(x)))
+se.between <- aggregate(dist.between, by=list(bins.between), function(x) sd(x)/sqrt(length(x)))
+qt.within <- aggregate(dist.within, by=list(bins.within), function(x) quantile(x, probs=c(0.025, 0.25, 0.75, 0.975)))
+qt.between <- aggregate(dist.between, by=list(bins.between), function(x) quantile(x, probs=c(0.025, 0.25, 0.75, 0.975)))
+
+xaxis <- aggregate(time.within, by=list(bins.within), mean)$x
+x.within <- xaxis - 0.25
+x.between <- xaxis + 0.25
+
+layout(mat=matrix(c(1,2), nrow=1), widths=c(2,4))
+par(mar=c(6, 5, 0.5, 0.5))
+stripchart(at=1, thetayc.same_different$same, vertical=T, method="jitter", jitter=0.3, xlim=c(0.5,2.5), ylim=c(0,1.0), yaxt="n", pch=19, ylab="Median distance")
+stripchart(at=2, thetayc.same_different$different, vertical=T, method="jitter", jitter=0.3, add=T, pch=19, col="red")
+axis(1, at=1:2, label=c("Intra-animal\ndistances", "Inter-animal\ndistances"), las=2, tick=F)
+axis(2, las=2)
+segments(x0=c(0.6, 1.6), x1=c(1.4, 2.4), y0=c(median(thetayc.same_different$same, na.rm=T), median(thetayc.same_different$different, na.rm=T)), lwd=4, lty=1)
+mtext(side=2, at=1, line=3, text="A", las=1, font=2, cex=2)
+
+par(mar=c(6,5,0.5, 0.5))
+plot(x=x.within, y=median.within, ylim=c(0,1), xlim=c(0,35), pch=19, xlab="Days between samples", ylab="Distance", yaxt="n")
+arrows(x0=x.within, x1=x.within, y0=median.within, y1=qt.within$x[,1], angle=0, lwd=2, length=0)
+arrows(x0=x.within, x1=x.within, y0=median.within, y1=qt.within$x[,4], angle=0, lwd=2, length=0)
+arrows(x0=x.within, x1=x.within, y0=median.within, y1=qt.within$x[,2], angle=90, lwd=2, length=0.03)
+arrows(x0=x.within, x1=x.within, y0=median.within, y1=qt.within$x[,3], angle=90, lwd=2, length=0.03)
+
+
+points(x=x.between, y=median.between, ylim=c(0,1), col="red", pch=19)
+arrows(x0=x.between, x1=x.between, y0=median.between, y1=qt.between$x[,1], angle=0, lwd=2, col="red", length=0)
+arrows(x0=x.between, x1=x.between, y0=median.between, y1=qt.between$x[,4], angle=0, lwd=2, col="red", length=0)
+arrows(x0=x.between, x1=x.between, y0=median.between, y1=qt.between$x[,2], angle=90, lwd=2, col="red", length=0.03)
+arrows(x0=x.between, x1=x.between, y0=median.between, y1=qt.between$x[,3], angle=90, lwd=2, col="red", length=0.03)
+
+legend(x=25, y=0.15, legend=c("Intra-animal", "Inter-animal"), pch=19, col=c("black", "red"))
+
+axis(2, las=1)
+
+bins <- levels(bins.within)
+split.bins <- strsplit(bins, ",")
+for(b in split.bins){
+	points(y=-0.04, x=gsub(".(.*)", "\\1", b[1]), pch=19, xpd=T, lwd=2)
+}
+
+points(x=xaxis[1], y=0.2, pch="*", cex=2)
+mtext(side=2, at=1, line=3, text="B", las=1, font=2, cex=2)
+```
+
+A striking characteristic of the microbiotas characterized in this study was the high intra- and inter-individual variation. Studies in other animals have observed less variation in microbiota structure within an individual over time than between individuals. We sought to determine whether non-domesticated animals also harbored personalized microbiotas. To investigate this in _Peromyscus_ spp. we took advantage of the ability to catch and release the same animal multiple times. Using the OTU-based approach the median intra-individual distance was significantly less than the median inter-individual distance (Wilcoxon paired test; P~θ~=`r round(thetayc.same_different.wilcox$p.value, digits=3)`); however, using the weighted UniFrac-based approach the difference was not significant (P~W~=`r round(weighted.same_different.wilcox$p.value, digits=2)`). Within the OTU-based analysis, there was wide variation in the intra-animal distances and the difference in the median intra- and inter-animal distances was small (difference=`r round(dist.diff, digits=2)`; Figure 5A). To investigate this further, we calculated the number of days that elapsed between recapturing events and created five time-windows such that each window had approximately the same number of mice that were recaptured within that time period (i.e. 1-3 [N=30], 4-11 [N=22], 12-14 [N=24], 15-19 [N=21], and >=20 days [N=24] apart). We then compared the intra-animal distances within these time periods to the inter-animal distances of different mice captured within the same intervals. Surprisingly, only the mice captured between 1 and 3 days apart were more similar to themselves than to other mice (Figure 5B; Wilcoxon Test; P=`r round(bin.p.values["A"], 3)`). In none of the other time windows was there a significant difference between samples collected from the same animal and the samples collected from different animals (all P>`r round(sort(bin.p.values)[2], 2)). These results suggest that any individualization of an animal’s microbiota is quickly lost.
 
 ## Conclusion
+We hope that you have found the code behind our analysis to be useful as you ponder our results and perhaps consider your own analysis. Please do not hesitate to contact Pat Schloss (pschloss@umich.edu) should you have any questions or concerns.
