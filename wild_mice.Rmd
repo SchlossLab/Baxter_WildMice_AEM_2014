@@ -1027,7 +1027,70 @@ weighted.food.mantel
 
 To test the role of diet in shaping the _Peromyscus_ species gut microbiota, we characterized the dietary contents of each PL and PMG sample using 18S rRNA sequencing. The diets of PL and PMG consisted of plant material (e.g. seeds, nuts, fruits, and green vegetation), arthropods, and fungi. Our 18S rRNA gene sequencing data confirmed previous results (26). We removed sequences outside of these broad taxonomic groups to minimize the contributions of microeukaryotic members of the gut microbiota. First, we tested for a difference in diet composition based on _Peromyscus_ species. We failed to find a significant difference in the structure of the diets when using AMOVA with correction for repeated measures (P`r ifelse(diet.species.adonis$aov.tab$"Pr(>F)"[1]==1, ">0.99", round(diet.species.adonis$aov.tab$"Pr(>F)"[1]==1, digits=2))`). Second, using the Mantel test we failed to identify a significant association between the distances between samples based on their bacterial community structure and the distances based on the structure of their diet (M~θ~=`r round(theta.food.mantel$statistic, digits=2)`, P~θ~=`r round(theta.food.mantel$signif, digits=2)`; M~W~=`r round(weighted.food.mantel$statistic, digits=2)`, P~W~=`r round(weighted.food.mantel$signif, digits=2)`; `r perm` permutations). Both analyses suggest the lack of an association between the structures of the diet and microbiota.
 
-To further characterize the relationship between diet and the microbiota, we attempted to correlate the relative abundance of OTUs that were found in more than half of the samples with the relative abundance of dietary components that appeared in more than half of the samples. We were unable to detect any Spearman correlation coefficients that had a P-value below 0.001. Next, we used DMM models to identify clusters within the diet data. This approach identified two clusters, which included a cluster of samples dominated by plant material (n=45) and a cluster of samples with a more diverse mixture of plants, arthropods, and fungi (n=49). When we used these clusters to test for an association within the community structure distance matrix between the microbiotas of the mice, we did not observe a significant effect of diet on community structure (P~θ~=0.72; P~W~=0.10). We then used the random forest algorithm to identify features in the microbiota that could distinguish the two dietary groups; however, the out of bag error rate was 45%, which indicates that it was unable to correctly classify the samples. As these analyses demonstrate, we were unable to find associations between specific members of the microbiota and the dietary contents of each sample. This confirms our observation that the weak association between the distances between the microbiota and diet structures was unlikely to be biologically relevant.
+```{r}
+food <- read.table(file="18S.analysis/wild_mice.18S.trim.contigs.good.unique.good.filter.unique.precluster.pick.eukarya.wang.pick.tx.1.subsample.shared", header=T, row.names=2)
+food <- food[,-c(1,2)]
+rownames(food) <- gsub("_18S", "", rownames(food))
+food.fb <- food[m.food,]
+common <- apply(food.fb>0, 2, sum)/nrow(food.fb) > 0.5
+food.fb <- food.fb[, common]
+nfoods <- ncol(food.fb)
+
+bact <- read.table(file="16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.an.unique_list.0.03.subsample.shared", header=T, row.names=2)
+bact <- bact[,-c(1,2)]
+rownames(bact) <- gsub("_16S", "", rownames(bact))
+bact.fb <- bact[m.food,]
+common <- apply(bact.fb>0, 2, sum)/nrow(bact.fb) > 0.5
+bact.fb <- bact.fb[, common]
+nbact <- ncol(bact.fb)
+
+pmatrix <- matrix(rep(0, nfoods*nbact), ncol=nfoods)
+colnames(pmatrix) <- colnames(food.fb)
+rownames(pmatrix) <- colnames(bact.fb)
+
+for(i in 1:nbact){
+	for(j in 1:nfoods){
+		pmatrix[i,j] <- cor.test(bact.fb[,i], food.fb[,j], method="spearman")$p.value
+	}
+}
+
+n.sig.cor <- sum(pmatrix<0.001)
+
+
+food.dmm.design <- read.table(file="18S.analysis/wild_mice.18S.trim.contigs.good.unique.good.filter.unique.precluster.pick.eukarya.wang.pick.tx.1.subsample.1.dmm.mix.design", stringsAsFactors=FALSE)
+rownames(food.dmm.design) <- gsub("_18S", "", food.dmm.design$V1)
+food.dmm.design <- food.dmm.design[m.food,]
+
+dmm.count <- table(food.dmm.design$V2)
+n.dmms <- length(dmm.count)
+
+
+
+
+theta.dmm.adonis <- adonis(theta.food~food.dmm.design$V2, strata=factor(m.good$ET), perm=perm)
+
+#                 Df SumsOfSqs   MeanSqs F.Model      R2 Pr(>F)
+# food.dmm.design  1   0.00336 0.0033614 0.74481 0.00869 0.4164
+# Residuals       85   0.38361 0.0045131         0.99131       
+# Total           86   0.38697                   1.00000       
+
+weighted.dmm.adonis <- adonis(weighted.food~food.dmm.design$V2, strata=factor(m.good$ET), perm=perm)
+
+#                 Df SumsOfSqs   MeanSqs F.Model     R2 Pr(>F)
+# food.dmm.design  1   0.01643 0.0164270  1.9568 0.0225 0.1105
+# Residuals       85   0.71355 0.0083947         0.9775       
+# Total           86   0.72998                   1.0000       
+
+
+
+#run random forest
+data.rf <- randomForest(x=bact.fb, y=food.dmm.design$V2, importance=TRUE, proximity=TRUE, ntree=1e4) 
+
+confusion <- data.rf$confusion[,1:2]
+oob.error <- (confusion[1,2]+confusion[2,1])/sum(confusion)*100
+```
+
+To further characterize the relationship between diet and the microbiota, we attempted to correlate the relative abundance of OTUs that were found in more than half of the samples with the relative abundance of dietary components that appeared in more than half of the samples. We were unable to detect any Spearman correlation coefficients that had a P-value below 0.001 (N=`r n.sig.cor`). Next, we used DMM models to identify clusters within the diet data. This approach identified two clusters (N=`r dmm.count`), which included a cluster of samples dominated by plant material (n=50) and a cluster of samples with a more diverse mixture of plants, arthropods, and fungi (n=37). When we used these clusters to test for an association within the community structure distance matrix between the microbiotas of the mice, we did not observe a significant effect of diet on community structure (AMOVA; P~θ~=`r round(theta.dmm.adonis$aov.tab$"Pr(>F)"[1], digits=2)`; P~W~=`r round(weighted.dmm.adonis$aov.tab$"Pr(>F)"[1], digits=2)`). We then used the random forest algorithm to identify features in the microbiota that could distinguish the two dietary groups; however, the out of bag error rate was `r round(oob.error, digits=1)`%, which indicates that it was unable to correctly classify the samples. As these analyses demonstrate, we were unable to find associations between specific members of the microbiota and the dietary contents of each sample. This confirms our observation that the weak association between the distances between the microbiota and diet structures was unlikely to be biologically relevant.
 
 ### A transient microbiota
 A striking characteristic of the microbiotas characterized in this study was the high intra- and inter-individual variation. Studies in other animals have observed less variation in microbiota structure within an individual over time than between individuals. We sought to determine whether non-domesticated animals also harbored personalized microbiotas. To investigate this in _Peromyscus_ spp. we took advantage of the ability to catch and release the same animal multiple times. Using the OTU-based approach the median intra-individual distance was significantly less than the median inter-individual distance (Wilcoxon paired test; P~θ~=0.002); however, using the weighted UniFrac-based approach the difference was not significant (P~W~=0.22). Within the OTU-based analysis, there was wide variation in the intra-animal distances and the difference in the median intra- and inter-animal distances was small (difference=0.06; Figure 5A). To investigate this further, we calculated the number of days that elapsed between recapturing events and created five time-windows such that each window had approximately the same number of mice that were recaptured within that time period (i.e. 1-3 [N=30], 4-11 [N=22], 12-14 [N=24], 15-19 [N=21], and >20 days [N=24] apart). We then compared the intra-animal distances within these time periods to the inter-animal distances of different mice captured within the same intervals. Surprisingly, only the mice captured between 1 and 3 days apart were more similar to themselves than to other mice (Figure 5B; Wilcoxon Test; P=0.001). In none of the other time windows was there a significant difference between samples collected from the same animal and the samples collected from different animals (all P>0.12). These results suggest that any individualization of an animal’s microbiota is quickly lost.
