@@ -955,10 +955,40 @@ location.weighted
 #       Significance: 0.81932 
 
 
+getIntraInterSiteDist <- function(distance, metadata){
+
+	nsamples <- nrow(metadata)
+	intra.site <- numeric()
+	inter.site <- numeric()
+	matrix <- as.matrix(distance)
+	
+	for(i in 1:nsamples){
+		for(j in 1:nsamples){
+				
+			if(j < i){
+				if(metadata[rownames(matrix)[i], "Station"] != metadata[colnames(matrix)[j], "Station"]){
+					inter.site <- c(inter.site, matrix[i,j])
+				} else {
+					intra.site <- c(intra.site, matrix[i,j])
+				}
+			}
+		}
+	}
+	return(list(inter = inter.site, intra = intra.site))
+}
+
+theta.inter_intra <- getIntraInterSiteDist(thetayc, md)
+theta.inter_intra.wilcox <- wilcox.test(theta.inter_intra$intra, theta.inter_intra$inter)
+#W = 122380, p-value = 0.7091
+
+weighted.inter_intra <- getIntraInterSiteDist(weighted, md)
+weighted.inter_intra.wilcox <- wilcox.test(weighted.inter_intra$intra, weighted.inter_intra$inter)
+# W = 117469.5, p-value = 0.9406
+
 
 ```
 
-Next, we hypothesized that animals collected from the same environment would be more likely to share a similar microbiota than animals collected from different environments. For this analysis, we used the sampling coordinates to define the animals’ environment (Figure 1). When we performed a Mantel test to test for the association between the distance between the sampling points and the β-diversity between the gut microbiotas, we failed to detect a significant association (M~θ~=`r round(location.thetayc$statistic, digits=2)`, P~θ~=`r round(location.thetayc$signif, digits=2)`; M~W~=`r round(location.weighted$statistic, digits=2)`, P~W~=`r round(location.weighted$signif, digits=2)`; `r perm` permutations). To test for a more localized habitat effect we compared the distances collected at the same site to those collected at different sites and again failed to detect a meaningful effect (Wilcoxon-test, P~θ~=0.70; P~W~=0.73). These results suggest the lack of a geographic or habitat-based effect on the _Peromyscus_ spp. microbiota.
+Next, we hypothesized that animals collected from the same environment would be more likely to share a similar microbiota than animals collected from different environments. For this analysis, we used the sampling coordinates to define the animals’ environment (Figure 1). When we performed a Mantel test to test for the association between the distance between the sampling points and the β-diversity between the gut microbiotas, we failed to detect a significant association (M~θ~=`r round(location.thetayc$statistic, digits=2)`, P~θ~=`r round(location.thetayc$signif, digits=2)`; M~W~=`r round(location.weighted$statistic, digits=2)`, P~W~=`r round(location.weighted$signif, digits=2)`; `r perm` permutations). To test for a more localized habitat effect we compared the distances collected at the same site to those collected at different sites and again failed to detect a meaningful effect (Wilcoxon-test, P~θ~=`r round(theta.inter_intra.wilcox$p.value, digits=2)`; P~W~=`r round(weighted.inter_intra.wilcox$p.value, digits=2)`). These results suggest the lack of a geographic or habitat-based effect on the _Peromyscus_ spp. microbiota.
 
 ### Diet was not associated with variation in microbiota
 To test the role of diet in shaping the _Peromyscus_ species gut microbiota, we characterized the dietary contents of each PL and PMG sample using 18S rRNA sequencing. The diets of PL and PMG consisted of plant material (e.g. seeds, nuts, fruits, and green vegetation), arthropods, and fungi. Our 18S rRNA gene sequencing data confirmed previous results (26). We removed sequences outside of these broad taxonomic groups to minimize the contributions of microeukaryotic members of the gut microbiota. First, we tested for a difference in diet composition based on _Peromyscus_ species. We failed to find a significant difference in the structure of the diets when using AMOVA with correction for repeated measures (P=0.98). Second, using the Mantel test we failed to identify a significant association between the distances between samples based on their bacterial community structure and the distances based on the structure of their diet (M~θ~=0.06, P~θ~=0.08; M~W~=0.10, P~W~=0.09; 10^4^ permutations). Both analyses suggest the lack of an association between the structures of the diet and microbiota.
