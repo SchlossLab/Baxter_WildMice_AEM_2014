@@ -849,6 +849,77 @@ age.weighted
 
 ```
 
+```{r figure4, fig.width=6, fig.height=4}
+
+bg.color <- c("PL" = "white", "PMG" = "black")
+
+def.par <- par(no.readonly = TRUE)
+l <- layout(matrix(c(	1,4,
+						2,4,
+						3,4
+						
+						), nrow=3, byrow=T),height=c(3.5,3.5,6.25), width=c(3,4))
+
+j.shannon <- aggregate(otu.alpha$shannon[md$Age=="J"], by=list(md$ET[md$Age=="J"]), median)
+sa.shannon <- aggregate(otu.alpha$shannon[md$Age=="SA"], by=list(md$ET[md$Age=="SA"]), median)
+a.shannon <- aggregate(otu.alpha$shannon[md$Age=="A"], by=list(md$ET[md$Age=="A"]), median)
+med.j <- median(j.shannon$x)
+med.sa <- median(sa.shannon$x)
+med.a <- median(a.shannon$x)
+
+par(mar=c(0, 5, 0.5, 0.5))
+stripchart(at=0.2, j.shannon$x, vertical=T, method="jitter", jitter=0.08, ylim=c(0,5), ylab="Shannon\ndiversity", xlab="", xaxt="n",  yaxt="n", bg=bg.color[md[j.shannon$Group.1,"SP"]], pch=21, xlim=c(0,1))
+stripchart(at=0.5, sa.shannon$x, vertical=T, method="jitter", jitter=0.08, xlab="", xaxt="n", yaxt="n", bg=bg.color[md[sa.shannon$Group.1,"SP"]], pch=21, add=T)
+stripchart(at=0.8, a.shannon$x, vertical=T, method="jitter", jitter=0.08, xlab="", xaxt="n", yaxt="n", bg=bg.color[md[a.shannon$Group.1,"SP"]], pch=21, add=T)
+
+segments(x0=0.1, x1=0.3, y0=med.j, lwd=3)
+segments(x0=0.4, x1=0.6, y0=med.sa, lwd=3)
+segments(x0=0.7, x1=0.9, y0=med.a, lwd=3)
+axis(2, las=2)
+mtext(side=2, at=5, las=1, line=3, text="A", cex=1.25, font=2)
+
+j.sobs <- aggregate(otu.alpha$sobs[md$Age=="J"], by=list(md$ET[md$Age=="J"]), median)
+sa.sobs <- aggregate(otu.alpha$sobs[md$Age=="SA"], by=list(md$ET[md$Age=="SA"]), median)
+a.sobs <- aggregate(otu.alpha$sobs[md$Age=="A"], by=list(md$ET[md$Age=="A"]), median)
+med.j <- median(j.sobs$x)
+med.sa <- median(sa.sobs$x)
+med.a <- median(a.sobs$x)
+
+par(mar=c(0, 5, 0.5, 0.5))
+stripchart(at=0.2, j.sobs$x, vertical=T, method="jitter", jitter=0.08, ylim=c(0,400), ylab="Number of OTUs\nobserved", xlab="", xaxt="n",  yaxt="n",  bg=bg.color[md[sa.sobs$Group.1,"SP"]], pch=21, xlim=c(0,1))
+stripchart(at=0.5, sa.sobs$x, vertical=T, method="jitter", jitter=0.08, xlab="", xaxt="n", yaxt="n",  bg=bg.color[md[sa.sobs$Group.1,"SP"]], pch=21, add=T)
+stripchart(at=0.8, a.sobs$x, vertical=T, method="jitter", jitter=0.08, xlab="", xaxt="n", yaxt="n",  bg=bg.color[md[sa.sobs$Group.1,"SP"]], pch=21, add=T)
+
+segments(x0=0.1, x1=0.3, y0=med.j, lwd=3)
+segments(x0=0.4, x1=0.6, y0=med.sa, lwd=3)
+segments(x0=0.7, x1=0.9, y0=med.a, lwd=3)
+axis(2, las=2)
+
+j.pd.values <- aggregate(pd.final[md$Age=="J"], by=list(md$ET[md$Age=="J"]), median)
+sa.pd.values <- aggregate(pd.final[md$Age=="SA"], by=list(md$ET[md$Age=="SA"]), median)
+a.pd.values <- aggregate(pd.final[md$Age=="A"], by=list(md$ET[md$Age=="A"]), median)
+med.j <- median(j.pd.values$x)
+med.sa <- median(sa.pd.values$x)
+med.a <- median(a.pd.values$x)
+
+par(mar=c(6, 5, 0.5, 0.5))
+stripchart(at=0.2, j.pd.values$x, vertical=T, method="jitter", jitter=0.08, ylim=c(0,18), ylab="Phylogenetic\ndiversity", xlab="", xaxt="n",  yaxt="n",  bg=bg.color[md[sa.pd.values$Group.1,"SP"]], pch=21, xlim=c(0,1))
+stripchart(at=0.5, sa.pd.values$x, vertical=T, method="jitter", jitter=0.08, xlab="", xaxt="n", yaxt="n",  bg=bg.color[md[sa.pd.values$Group.1,"SP"]], pch=21, add=T)
+stripchart(at=0.8, a.pd.values$x, vertical=T, method="jitter", jitter=0.08, xlab="", xaxt="n", yaxt="n",  bg=bg.color[md[sa.pd.values$Group.1,"SP"]], pch=21, add=T)
+
+segments(x0=0.1, x1=0.3, y0=med.j, lwd=3)
+segments(x0=0.4, x1=0.6, y0=med.sa, lwd=3)
+segments(x0=0.7, x1=0.9, y0=med.a, lwd=3)
+axis(2, las=2)
+axis(1, at=c(0.2,0.5,0.8), label=c("Juvenile", "Adolescent", "Adult"), las=2, tick=F)
+
+
+par(mar=c(5, 5, 0.5, 0.5))
+plot(otu.alpha$shannon~md$Weight, pch=21, xlab="Weight (g)", ylab="Shannon diversity", ylim=c(0,5), xlim=c(4,28),  bg=bg.color[md$SP])
+mtext(side=2, at=5.14, las=1, line=3, text="B", cex=1.25, font=2)
+legend(x=15, y=0.75, legend=c("P. leucopus", "P. maniculatus gracilis"), pt.bg=c("white", "black"), text.font=3, pch=21, cex=0.8)
+```
+
 We next tested how differences in sex, reproductive condition, and age affected the gut microbiota of _Peromyscus_. We were unable to detect a sex-based difference in the richness (P=`r format(sobs.anova[[2]][[1]]$"Pr(>F)"[2], digits=2)`), Shannon diversity (P=`r format(shannon.anova[[2]][[1]]$"Pr(>F)"[2], digits=2)`), phylogenetic diversity (P=`r format(pd.anova[[2]][[1]]$"Pr(>F)"[2], digits=2)`), or community structure (AMOVA; P~θ~=`r format(thetayc.adonis$aov.tab$"Pr(>F)"[2], digits=2)`; P~W~=`r format(weighted.adonis$aov.tab$"Pr(>F)"[2], digits=2)`) of the _Peromyscus_ spp. microbiota. To investigate possible sex-based differences further, we focused on sexually mature adult males and females, which had descended testes and emerged nipples, respectively; however, we were unable to identify a sex-based effect on the richness (P=`r format(sm.sobs[[2]][[1]]$"Pr(>F)"[1], digits=2)`), Shannon diversity (P=`r format(sm.shannon[[2]][[1]]$"Pr(>F)"[1], digits=2)`), phylogenetic diversity (P=`r format(sm.pd[[2]][[1]]$"Pr(>F)"[1], digits=2)`), or community structure (AMOVA; P~θ~=`r format(sm.sex.thetayc$aov.tab$"Pr(>F)"[1], digits=2)`; P~W~=`r format(sm.sex.weighted$aov.tab$"Pr(>F)"[1], digits=2)`). Furthermore, none of the OTUs that appeared in at least half of the samples were differentially enriched in either sex. Stratification of the mice into the age categories of juvenile (N=`r n.age["J"]`), adolescent (N=`r n.age["SA"]`), and adult (N=`r n.age["A"]`) did reveal marginal differences in the richness (P=`r format(sobs.age[[2]][[1]]$"Pr(>F)"[1], digits=2)`) and diversity (P=`r format(shannon.age[[2]][[1]]$"Pr(>F)"[1], digits=2)`) between the cohorts but not their phylogenetic diversity (P=`r format(pd.age[[2]][[1]]$"Pr(>F)"[1], digits=2)`; Figure 4A). The overall trend was for older mice to have a more rich and complex community relative. This was paralleled by a modest correlation between the animals’ weight and their Shannon diversity (Spearman’s rho=`r format(spearman.wt.shannon$estimate, digits=2)`, P=`r format(round(spearman.wt.shannon$p.value, digits=3), digits=2)`; Figure 4B). Although there did appear to be some effect of age on the richness and diversity of the communities, it was difficult to ascribe much biological significance to these differences considering the differences in overall community structure were not significantly different from each other (AMOVA; P~θ~=`r format(age.thetayc$aov.tab$"Pr(>F)"[1]], digits=2)`; P~W~=`r format(age.weighted$aov.tab$"Pr(>F)"[1], digits=2)`) and there were no OTUs that were differentially abundant between the three age categories. Overall, by the parameters we were able to measure, we were unable to detect a robust effect of host physiology on their microbiota.
 
 ### Location of sampling was not associated with variation in microbiota
