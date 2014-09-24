@@ -765,10 +765,36 @@ One striking feature of the communities observed between the mice was the large 
 
 ```{r}
 
+n.age <- table(md$Age)
+
+sobs.age <- summary(aov(rank(otu.alpha$sobs) ~ md$Age + Error(md$ET)))
+sobs.age
+
+#           Df Sum Sq Mean Sq F value Pr(>F)  
+#md$Age      2   6123    3061   3.056 0.0512 .
+#Residuals 107 107173    1002                 
+
+shannon.age <- summary(aov(rank(otu.alpha$shannon) ~ md$Age + Error(md$ET)))
+shannon.age
+
+#           Df Sum Sq Mean Sq F value Pr(>F)  
+#md$Age      2   7680    3840   3.982 0.0215 *
+#Residuals 107 103200     964                 
+
+pd.age <- summary(aov(rank(pd.final) ~ md$Age + Error(md$ET)))
+pd.age
+
+#           Df Sum Sq Mean Sq F value Pr(>F)
+#md$Age      2   1887   943.7   0.919  0.402
+#Residuals 107 109871  1026.8               
 
 ```
 
-We next tested how differences in sex, reproductive condition, and age affected the gut microbiota of _Peromyscus_. We were unable to detect a sex-based difference in the richness (P=`r format(sobs.anova[[2]][[1]]$"Pr(>F)"[2], digits=2)`), Shannon diversity (P=`r format(shannon.anova[[2]][[1]]$"Pr(>F)"[2], digits=2)`), phylogenetic diversity (P=`r format(pd.anova[[2]][[1]]$"Pr(>F)"[2], digits=2)`), or community structure (AMOVA; P~θ~=`r format(thetayc.adonis$aov.tab$"Pr(>F)"[2], digits=2)`; P~W~=`r format(weighted.adonis$aov.tab$"Pr(>F)"[2], digits=2)`) of the _Peromyscus_ spp. microbiota. To investigate possible sex-based differences further, we focused on sexually mature adult males and females, which had descended testes and emerged nipples, respectively; however, we were unable to identify a sex-based effect on the richness (P=0.09), Shannon diversity (P=0.10), phylogenetic diversity (P=0.15), or community structure (AMOVA; P~θ~=0.43; P~W~=0.82). Furthermore, none of the OTUs that appeared in at least half of the samples were differentially enriched in either sex. Stratification of the mice into the age categories of juvenile (N=30), adolescent (N=30), and adult (N=51) did reveal marginal differences in the richness (P=0.05) and diversity (P=0.03) between the cohorts but not their phylogenetic diversity (P=0.22; Figure 4A). The overall trend was for older mice to have a more rich and complex community relative. This was paralleled by a modest correlation between the animals’ weight and their Shannon diversity (Spearman’s rho=0.30, P=0.001; Figure 4B). Although there did appear to be some effect of age on the richness and diversity of the communities, it was difficult to ascribe much biological significance to these differences considering the differences in overall community structure were not significantly different from each other (AMOVA; P~θ~=0.64; P~W~=0.29) and there were no OTUs that were differentially abundant between the three age categories. Overall, by the parameters we were able to measure, we were unable to detect a robust effect of host physiology on their microbiota.
+We next tested how differences in sex, reproductive condition, and age affected the gut microbiota of _Peromyscus_. We were unable to detect a sex-based difference in the richness (P=`r format(sobs.anova[[2]][[1]]$"Pr(>F)"[2], digits=2)`), Shannon diversity (P=`r format(shannon.anova[[2]][[1]]$"Pr(>F)"[2], digits=2)`), phylogenetic diversity (P=`r format(pd.anova[[2]][[1]]$"Pr(>F)"[2], digits=2)`), or community structure (AMOVA; P~θ~=`r format(thetayc.adonis$aov.tab$"Pr(>F)"[2], digits=2)`; P~W~=`r format(weighted.adonis$aov.tab$"Pr(>F)"[2], digits=2)`) of the _Peromyscus_ spp. microbiota.
+
+To investigate possible sex-based differences further, we focused on sexually mature adult males and females, which had descended testes and emerged nipples, respectively; however, we were unable to identify a sex-based effect on the richness (P=0.09), Shannon diversity (P=0.10), phylogenetic diversity (P=0.15), or community structure (AMOVA; P~θ~=0.43; P~W~=0.82).
+
+Furthermore, none of the OTUs that appeared in at least half of the samples were differentially enriched in either sex. Stratification of the mice into the age categories of juvenile (N=`r n.age["J"]`), adolescent (N=`r n.age["SA"]`), and adult (N=`r n.age["A"]`) did reveal marginal differences in the richness (P=`r format(sobs.age[[2]][[1]]$"Pr(>F)"[1], digits=2)`) and diversity (P=`r format(shannon.age[[2]][[1]]$"Pr(>F)"[1], digits=2)`) between the cohorts but not their phylogenetic diversity (P=`r format(pd.age[[2]][[1]]$"Pr(>F)"[1], digits=2)`; Figure 4A). The overall trend was for older mice to have a more rich and complex community relative. This was paralleled by a modest correlation between the animals’ weight and their Shannon diversity (Spearman’s rho=0.30, P=0.001; Figure 4B). Although there did appear to be some effect of age on the richness and diversity of the communities, it was difficult to ascribe much biological significance to these differences considering the differences in overall community structure were not significantly different from each other (AMOVA; P~θ~=0.64; P~W~=0.29) and there were no OTUs that were differentially abundant between the three age categories. Overall, by the parameters we were able to measure, we were unable to detect a robust effect of host physiology on their microbiota.
 
 ### Location of sampling was not associated with variation in microbiota
 Next, we hypothesized that animals collected from the same environment would be more likely to share a similar microbiota than animals collected from different environments. For this analysis, we used the sampling coordinates to define the animals’ environment (Figure 1). When we performed a Mantel test to test for the association between the distance between the sampling points and the β-diversity between the gut microbiotas, we failed to detect a significant association (M~θ~=-0.02, P~θ~=0.90; M~W~=-0.01, P~W~=0.61; 104 permutations). To test for a more localized habitat effect we compared the distances collected at the same site to those collected at different sites and again failed to detect a meaningful effect (Wilcoxon-test, P~θ~=0.70; P~W~=0.73). These results suggest the lack of a geographic or habitat-based effect on the _Peromyscus_ spp. microbiota.
