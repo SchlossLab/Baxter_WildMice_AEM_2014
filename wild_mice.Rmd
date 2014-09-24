@@ -352,7 +352,11 @@ mothur "#
 	homova(phylip=16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.an.unique_list.0.03.subsample.thetayc.0.03.square.ave.dist, design=wild.species.design, iters=10000)
 	homova(phylip=16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.phylip.tre1.weighted.ave.dist, design=wild.species.design, iters=10000)
 
-  get.communitytype(shared=16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.an.unique_list.0.03.subsample.shared)
+  get.communitytype(shared=16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.an.unique_list.0.03.subsample.shared);
+
+dist.shared(shared=18S.analysis/wild_mice.18S.trim.contigs.good.unique.good.filter.unique.precluster.pick.eukarya.wang.pick.tx.shared, calc=thetayc, subsample=500, iters=100, output=square, processors=8)
+sub.sample(shared=18S.analysis/wild_mice.18S.trim.contigs.good.unique.good.filter.unique.precluster.pick.eukarya.wang.pick.tx.shared, size=500)
+get.communitytype(shared=current)
 "
 ```
 
@@ -987,7 +991,41 @@ weighted.inter_intra.wilcox <- wilcox.test(weighted.inter_intra$intra, weighted.
 Next, we hypothesized that animals collected from the same environment would be more likely to share a similar microbiota than animals collected from different environments. For this analysis, we used the sampling coordinates to define the animals’ environment (Figure 1). When we performed a Mantel test to test for the association between the distance between the sampling points and the β-diversity between the gut microbiotas, we failed to detect a significant association (M~θ~=`r round(location.thetayc$statistic, digits=2)`, P~θ~=`r round(location.thetayc$signif, digits=2)`; M~W~=`r round(location.weighted$statistic, digits=2)`, P~W~=`r round(location.weighted$signif, digits=2)`; `r perm` permutations). To test for a more localized habitat effect we compared the distances collected at the same site to those collected at different sites and again failed to detect a meaningful effect (Wilcoxon-test, P~θ~=`r round(theta.inter_intra.wilcox$p.value, digits=2)`; P~W~=`r round(weighted.inter_intra.wilcox$p.value, digits=2)`). These results suggest the lack of a geographic or habitat-based effect on the _Peromyscus_ spp. microbiota.
 
 ### Diet was not associated with variation in microbiota
-To test the role of diet in shaping the _Peromyscus_ species gut microbiota, we characterized the dietary contents of each PL and PMG sample using 18S rRNA sequencing. The diets of PL and PMG consisted of plant material (e.g. seeds, nuts, fruits, and green vegetation), arthropods, and fungi. Our 18S rRNA gene sequencing data confirmed previous results (26). We removed sequences outside of these broad taxonomic groups to minimize the contributions of microeukaryotic members of the gut microbiota. First, we tested for a difference in diet composition based on _Peromyscus_ species. We failed to find a significant difference in the structure of the diets when using AMOVA with correction for repeated measures (P=0.98). Second, using the Mantel test we failed to identify a significant association between the distances between samples based on their bacterial community structure and the distances based on the structure of their diet (M~θ~=0.06, P~θ~=0.08; M~W~=0.10, P~W~=0.09; 10^4^ permutations). Both analyses suggest the lack of an association between the structures of the diet and microbiota.
+
+```{r}
+food <- read.table(file="18S.analysis/wild_mice.18S.trim.contigs.good.unique.good.filter.unique.precluster.pick.eukarya.wang.pick.tx.thetayc.1.square.ave.dist", skip=1, row.names=1)
+rownames(food) <- gsub("_18S", "", rownames(food))
+colnames(food) <- rownames(food)
+
+m.food <- intersect(rownames(food), rownames(md))
+
+food.good <- food[m.food,m.food]
+m.good <- md[m.food,]
+
+diet.species.adonis <- adonis(food.good~m.good$SP, strata=factor(m.good$ET), perm=perm)
+diet.species.adonis
+#          Df SumsOfSqs  MeanSqs F.Model    R2 Pr(>F)
+#m.good$SP  1    0.0164 0.016404 0.34178 0.004      1
+#Residuals 85    4.0797 0.047996         0.996       
+#Total     86    4.0961                  1.000       
+
+
+theta.food <- as.matrix(thetayc)[m.food,m.food]
+theta.food.mantel <- mantel(theta.food, food, method="spearman", permutations=1e4)
+theta.food.mantel
+# Mantel statistic r: 0.09349 
+#       Significance: 0.068893 
+
+
+weighted.food <- as.matrix(weighted)[m.food,m.food]
+weighted.food.mantel <- mantel(weighted.food, food, method="spearman", permutations=1e4)
+weighted.food.mantel
+# Mantel statistic r: 0.09022 
+#       Significance: 0.094391 
+
+```
+
+To test the role of diet in shaping the _Peromyscus_ species gut microbiota, we characterized the dietary contents of each PL and PMG sample using 18S rRNA sequencing. The diets of PL and PMG consisted of plant material (e.g. seeds, nuts, fruits, and green vegetation), arthropods, and fungi. Our 18S rRNA gene sequencing data confirmed previous results (26). We removed sequences outside of these broad taxonomic groups to minimize the contributions of microeukaryotic members of the gut microbiota. First, we tested for a difference in diet composition based on _Peromyscus_ species. We failed to find a significant difference in the structure of the diets when using AMOVA with correction for repeated measures (P`r ifelse(diet.species.adonis$aov.tab$"Pr(>F)"[1]==1, ">0.99", round(diet.species.adonis$aov.tab$"Pr(>F)"[1]==1, digits=2))`). Second, using the Mantel test we failed to identify a significant association between the distances between samples based on their bacterial community structure and the distances based on the structure of their diet (M~θ~=`r round(theta.food.mantel$statistic, digits=2)`, P~θ~=`r round(theta.food.mantel$signif, digits=2)`; M~W~=`r round(weighted.food.mantel$statistic, digits=2)`, P~W~=`r round(weighted.food.mantel$signif, digits=2)`; `r perm` permutations). Both analyses suggest the lack of an association between the structures of the diet and microbiota.
 
 To further characterize the relationship between diet and the microbiota, we attempted to correlate the relative abundance of OTUs that were found in more than half of the samples with the relative abundance of dietary components that appeared in more than half of the samples. We were unable to detect any Spearman correlation coefficients that had a P-value below 0.001. Next, we used DMM models to identify clusters within the diet data. This approach identified two clusters, which included a cluster of samples dominated by plant material (n=45) and a cluster of samples with a more diverse mixture of plants, arthropods, and fungi (n=49). When we used these clusters to test for an association within the community structure distance matrix between the microbiotas of the mice, we did not observe a significant effect of diet on community structure (P~θ~=0.72; P~W~=0.10). We then used the random forest algorithm to identify features in the microbiota that could distinguish the two dietary groups; however, the out of bag error rate was 45%, which indicates that it was unable to correctly classify the samples. As these analyses demonstrate, we were unable to find associations between specific members of the microbiota and the dietary contents of each sample. This confirms our observation that the weak association between the distances between the microbiota and diet structures was unlikely to be biologically relevant.
 
