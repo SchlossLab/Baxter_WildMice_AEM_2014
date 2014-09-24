@@ -289,7 +289,7 @@ for(et in dup.et){
 }
 ```
 
-Between `r start` and `r end`, 2010 we used live traps to capture and release PL and PMG from sites within a 400 m by 400 m grid (20 m intervals) within Pigeon River State Forest in Cheboygan County, MI. Because animals were given ear tags at the initial capture event, we were able to document the animals that were captured multiple times. We obtained `r sum(samples.per.species["PL"])` fecal samples from `r indiv.per.species["PL"]` PL animals and `r sum(samples.per.species["PMG"])` fecal samples from `r sum(indiv.per.species["PMG"])` PMG animals. Among the samples from animals captured multiple times (N=`r indiv.multiple` animals), the median distance between successive re-sampling events was `r format(median(dist.travel), digits=0)` m (minimum=`r format(min(dist.travel), digits=0)` m, maximum=`r format(max(dist.travel), digits=0)` m). When we overlaid the species of _Peromyscus_ on the sampling grid, we were unable to detect variation in the range of the mice supporting the notion that the habitats of these mice overlapped (Figures 1A and 1B).
+Between `r start` and `r end`, 2010 we used live traps to capture and release PL and PMG from sites within a 400 m by 400 m grid (20 m intervals) within Pigeon River State Forest in Cheboygan County, MI. Because animals were given ear tags at the initial capture event, we were able to document the animals that were captured multiple times. We obtained `r sum(samples.per.species["PL"])` fecal samples from `r indiv.per.species["PL"]` PL animals and `r sum(samples.per.species["PMG"])` fecal samples from `r sum(indiv.per.species["PMG"])` PMG animals. Among the samples from animals captured multiple times (N=`r indiv.multiple` animals), the median distance between successive re-sampling events was `r round(median(dist.travel), digits=0)` m (minimum=`r round(min(dist.travel), digits=0)` m, maximum=`r round(max(dist.travel), digits=0)` m). When we overlaid the species of _Peromyscus_ on the sampling grid, we were unable to detect variation in the range of the mice supporting the notion that the habitats of these mice overlapped (Figures 1A and 1B).
 
 ````{r figure1, tidy=TRUE}
 #the PL grid
@@ -419,7 +419,7 @@ dmm.fit <- read.table(file="16S.analysis/wild_mice.16S.trim.contigs.unique.good.
 n.dmms <- which.min(dmm.fit$Laplace)
 
 ```
-We compared the fecal communities between the two host species to test whether the genetic differences between the two animal species would translate into differences in their microbiotas. Using a variety of statistical tests, we were unable to detect a meaningful difference between the two species. First, there was not a significant difference in the richness (P=`r format(sobs.anova[[2]][[1]]$"Pr(>F)"[1], digits=2)`), Shannon diversity (P=`r format(shannon.anova[[2]][[1]]$"Pr(>F)"[1], digits=2)`), or phylogenetic diversity (P=`r format(pd.anova[[2]][[1]]$"Pr(>F)"[1], digits=2)`) between the two species of mice (Figure 2A). Second, there was not a significant difference in the community structures of the microbiota characterized from the two species (AMOVA; P~θ~=`r format(thetayc.adonis$aov.tab$"Pr(>F)"[1], digits=2)`; P~W~=`r format(weighted.adonis$aov.tab$"Pr(>F)"[1], digits=2)`). Third, there was not a significant difference in the variation of their community structure within the microbiota characterized from the two species (HOMOVA; P~θ~=`r format(theta.homova[,3], digits=2)`; P~W~=`r format(weighted.homova[,3], digits=2)`). Finally, when we attempted to fit the OTU abundance data to DMM models, there was no support for more than one (`r n.dmms`) community type. In each of these comparisons, the level of variation across mice within either species was considerable (Figure 2B).
+We compared the fecal communities between the two host species to test whether the genetic differences between the two animal species would translate into differences in their microbiotas. Using a variety of statistical tests, we were unable to detect a meaningful difference between the two species. First, there was not a significant difference in the richness (P=`r round(sobs.anova[[2]][[1]]$"Pr(>F)"[1], digits=2)`), Shannon diversity (P=`r round(shannon.anova[[2]][[1]]$"Pr(>F)"[1], digits=2)`), or phylogenetic diversity (P=`r round(pd.anova[[2]][[1]]$"Pr(>F)"[1], digits=2)`) between the two species of mice (Figure 2A). Second, there was not a significant difference in the community structures of the microbiota characterized from the two species (AMOVA; P~θ~=`r round(thetayc.adonis$aov.tab$"Pr(>F)"[1], digits=2)`; P~W~=`r round(weighted.adonis$aov.tab$"Pr(>F)"[1], digits=2)`). Third, there was not a significant difference in the variation of their community structure within the microbiota characterized from the two species (HOMOVA; P~θ~=`r round(theta.homova[,3], digits=2)`; P~W~=`r round(weighted.homova[,3], digits=2)`). Finally, when we attempted to fit the OTU abundance data to DMM models, there was no support for more than one (`r n.dmms`) community type. In each of these comparisons, the level of variation across mice within either species was considerable (Figure 2B).
 
 ```{r, warning=FALSE}
 otu.subsampled <-read.table(file="16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.an.unique_list.0.03.subsample.shared", header=T, row.names=2)
@@ -475,162 +475,157 @@ most.imp.mda <- imp[most.imp.otus, "MeanDecreaseAccuracy"]
 
 ```
 
-```{r figure 2, height=4, width=7.5, warning=FALSE, fig.align='center', tidy=TRUE}
-figure2 <- function(){
-	l <- layout(matrix(c(	1,4,6,
-							2,4,6,
-							2,5,6,
-							3,5,6
-							
-							), nrow=4, byrow=T),height=c(3,1.5,1.5,6.25), width=c(3,4,5))
-	
-
-	# panel A
-	pl.shannon <- aggregate(otu.alpha$shannon[md$SP=="PL"], by=list(md$ET[md$SP=="PL"]), median)$x
-	pmg.shannon <- aggregate(otu.alpha$shannon[md$SP=="PMG"], by=list(md$ET[md$SP=="PMG"]), median)$x
-	med.pl <- median(pl.shannon)
-	med.pmg <- median(pmg.shannon)
-
-	par(mar=c(0, 5, 0.5, 0.5))
-	stripchart(at=0.25, pl.shannon, vertical=T, method="jitter", ylim=c(0,5), ylab="Shannon\ndiversity", xlab="", xaxt="n",  yaxt="n", bg="white", pch=21, xlim=c(0,1))
-	stripchart(at=0.75, pmg.shannon, vertical=T, method="jitter", xlab="", xaxt="n", yaxt="n", bg="black", pch=21, add=T)
-
-	segments(x0=0.1, x1=0.4, y0=med.pl, lwd=3)
-	segments(x0=0.6, x1=0.9, y0=med.pl, lwd=3)
-	axis(2, las=2)
-	mtext(side=2, at=4.8, line=2.5, cex=1.25, las=1, font=2, text="A")
-
-	pl.sobs <- aggregate(otu.alpha$sobs[md$SP=="PL"], by=list(md$ET[md$SP=="PL"]), median)$x
-	pmg.sobs <- aggregate(otu.alpha$sobs[md$SP=="PMG"], by=list(md$ET[md$SP=="PMG"]), median)$x
-	med.pl <- median(pl.sobs)
-	med.pmg <- median(pmg.sobs)
-
-	par(mar=c(0, 5, 0.5, 0.5))
-	stripchart(at=0.25, pl.sobs, vertical=T, method="jitter", ylim=c(0,400), ylab="Number of\nOTUs observed", xlab="", xaxt="n",  yaxt="n", bg="white", pch=21, xlim=c(0,1))
-	stripchart(at=0.75, pmg.sobs, vertical=T, method="jitter", xlab="", xaxt="n", yaxt="n", bg="black", pch=21, add=T)
-	segments(x0=0.1, x1=0.4, y0=med.pl, lwd=3)
-	segments(x0=0.6, x1=0.9, y0=med.pmg, lwd=3)
-	axis(2, las=2)
-
-	pl.pd <- aggregate(pd.final[md$SP=="PL"], by=list(md$ET[md$SP=="PL"]), median)$x
-	pmg.pd <- aggregate(pd.final[md$SP=="PMG"], by=list(md$ET[md$SP=="PMG"]), median)$x
-	med.pl <- median(pd.final)
-	med.pmg <- median(pd.final)
-
-	par(mar=c(8, 5, 0.5, 0.5))
-	stripchart(at=0.25, pl.pd, vertical=T, method="jitter", ylim=c(0,18), ylab="Phylogenetic\ndiversity", xlab="", xaxt="n",  yaxt="n", bg="white", pch=21, xlim=c(0,1))
-	stripchart(at=0.75, pmg.pd, vertical=T, method="jitter", xlab="", xaxt="n", yaxt="n", bg="black", pch=21, add=T)
-
-	segments(x0=0.1, x1=0.4, y0=med.pl, lwd=3)
-	segments(x0=0.6, x1=0.9, y0=med.pmg, lwd=3)
-	axis(1, at=c(0.25,0.75), label=c(expression(italic("P. leucopis")), expression(italic("P. maniculatus\ngracilis"))), las=2, tick=F)
-	axis(2, las=2)
+```{r figure2, height=4, width=7.5, warning=FALSE, fig.align='center', tidy=TRUE}
+l <- layout(matrix(c(	1,4,6,
+						2,4,6,
+						2,5,6,
+						3,5,6
+						
+						), nrow=4, byrow=T),height=c(3,1.5,1.5,6.25), width=c(3,4,5))
 
 
-	# panel B
-	pl <- numeric()
-	pmg <- numeric()
-	between <- numeric()
-	
-	pl.et <- factor(md[md$SP=="PL", "ET"])
-	thetayc <- as.matrix(thetayc)
-	for(et in pl.et){
-		pl[et] <- median(unlist(thetayc[md$ET==et, md$ET!=et]))
-		between[et] <- median(unlist(thetayc[md$ET==et, md$SP!="PL"]))
-	}
-	
-	pmg.et <- factor(md[md$SP=="PMG", "ET"])
-	for(et in pmg.et){
-		pmg[et] <- median(unlist(thetayc[md$ET==et, md$ET!=et]))
-		between[et] <- median(unlist(thetayc[md$ET==et, md$SP!="PMG"]))
-	}
-	
-	par(mar=c(0, 5, 0.5, 0.5))
-	stripchart(at=1, pl, vertical=T, method="jitter", jitter=0.3, xlim=c(0.5,3.5), ylim=c(0,1.0), yaxt="n", pch=21, bg="white", ylab=expression(paste("Median ", theta["YC"], " distance", sep=" ")))
-	stripchart(at=2, pmg, vertical=T, method="jitter", jitter=0.3, add=T, pch=19, col="black")
-	stripchart(at=3, between, vertical=T, method="jitter", jitter=0.3, add=T, pch=19, col="gray")
-	#axis(1, at=1:3, label=c("Among\nP. leucopis", "Among\nP. maniculatus\ngracilis", "Between\nspecies"), las=2, tick=F)
-	axis(2, las=2)
-	segments(x0=c(0.6, 1.6, 2.6), x1=c(1.4, 2.4, 3.4), y0=c(median(pl), median(pmg), median(pmg)), y1=c(median(pl), median(pmg), median(pmg)), lwd=4, lty=1)
-	mtext(side=2, at=1.0, line=2.5, cex=1.25, las=1, font=2, text="B")
+# panel A
+pl.shannon <- aggregate(otu.alpha$shannon[md$SP=="PL"], by=list(md$ET[md$SP=="PL"]), median)$x
+pmg.shannon <- aggregate(otu.alpha$shannon[md$SP=="PMG"], by=list(md$ET[md$SP=="PMG"]), median)$x
+med.pl <- median(pl.shannon)
+med.pmg <- median(pmg.shannon)
 
-		
-	
-	weighted <- as.matrix(weighted)
+par(mar=c(0, 5, 0.5, 0.5))
+stripchart(at=0.25, pl.shannon, vertical=T, method="jitter", ylim=c(0,5), ylab="Shannon\ndiversity", xlab="", xaxt="n",  yaxt="n", bg="white", pch=21, xlim=c(0,1))
+stripchart(at=0.75, pmg.shannon, vertical=T, method="jitter", xlab="", xaxt="n", yaxt="n", bg="black", pch=21, add=T)
 
-	pl <- numeric()
-	pmg <- numeric()
-	between <- numeric()
-	
-	pl.et <- factor(md[md$SP=="PL", "ET"])
-	for(et in pl.et){
-		pl[et] <- median(unlist(weighted[md$ET==et, md$ET!=et]))
-			between[et] <- median(unlist(weighted[md$ET==et, md$SP!="PL"]))
-	}
-	
-	pmg.et <- factor(md[md$SP=="PMG", "ET"])
-	for(et in pmg.et){
-		pmg[et] <- median(unlist(weighted[md$ET==et, md$ET!=et]))
-		between[et] <- median(unlist(weighted[md$ET==et, md$SP!="PMG"]))
-	}
-	
-	par(mar=c(8, 5, 0.5, 0.5))
-	stripchart(at=1, pl, vertical=T, method="jitter", jitter=0.3, xlim=c(0.5,3.5), ylim=c(0,1.0), yaxt="n", pch=21, bg="white", ylab="Median weighted\nUniFrac distance")
-	stripchart(at=2, pmg, vertical=T, method="jitter", jitter=0.3, add=T, pch=19, col="black")
-	stripchart(at=3, between, vertical=T, method="jitter", jitter=0.3, add=T, pch=19, col="gray")
-	axis(1, at=1:3, label=c("Among\nP. leucopis", "Among\nP. maniculatus\ngracilis", "Between\nspecies"), las=2, tick=F)
-	axis(2, las=2)
-	segments(x0=c(0.6, 1.6, 2.6), x1=c(1.4, 2.4, 3.4), y0=c(median(pl), median(pmg), median(pmg)), y1=c(median(pl), median(pmg), median(pmg)), lwd=4, lty=1)
-	#mtext(side=2, at=1.0, line=2.5, cex=1.25, las=1, font=2, text="B")
+segments(x0=0.1, x1=0.4, y0=med.pl, lwd=3)
+segments(x0=0.6, x1=0.9, y0=med.pl, lwd=3)
+axis(2, las=2)
+mtext(side=2, at=4.8, line=2.5, cex=1.25, las=1, font=2, text="A")
+
+pl.sobs <- aggregate(otu.alpha$sobs[md$SP=="PL"], by=list(md$ET[md$SP=="PL"]), median)$x
+pmg.sobs <- aggregate(otu.alpha$sobs[md$SP=="PMG"], by=list(md$ET[md$SP=="PMG"]), median)$x
+med.pl <- median(pl.sobs)
+med.pmg <- median(pmg.sobs)
+
+par(mar=c(0, 5, 0.5, 0.5))
+stripchart(at=0.25, pl.sobs, vertical=T, method="jitter", ylim=c(0,400), ylab="Number of\nOTUs observed", xlab="", xaxt="n",  yaxt="n", bg="white", pch=21, xlim=c(0,1))
+stripchart(at=0.75, pmg.sobs, vertical=T, method="jitter", xlab="", xaxt="n", yaxt="n", bg="black", pch=21, add=T)
+segments(x0=0.1, x1=0.4, y0=med.pl, lwd=3)
+segments(x0=0.6, x1=0.9, y0=med.pmg, lwd=3)
+axis(2, las=2)
+
+pl.pd <- aggregate(pd.final[md$SP=="PL"], by=list(md$ET[md$SP=="PL"]), median)$x
+pmg.pd <- aggregate(pd.final[md$SP=="PMG"], by=list(md$ET[md$SP=="PMG"]), median)$x
+med.pl <- median(pd.final)
+med.pmg <- median(pd.final)
+
+par(mar=c(8, 5, 0.5, 0.5))
+stripchart(at=0.25, pl.pd, vertical=T, method="jitter", ylim=c(0,18), ylab="Phylogenetic\ndiversity", xlab="", xaxt="n",  yaxt="n", bg="white", pch=21, xlim=c(0,1))
+stripchart(at=0.75, pmg.pd, vertical=T, method="jitter", xlab="", xaxt="n", yaxt="n", bg="black", pch=21, add=T)
+
+segments(x0=0.1, x1=0.4, y0=med.pl, lwd=3)
+segments(x0=0.6, x1=0.9, y0=med.pmg, lwd=3)
+axis(1, at=c(0.25,0.75), label=c(expression(italic("P. leucopis")), expression(italic("P. maniculatus\ngracilis"))), las=2, tick=F)
+axis(2, las=2)
 
 
-	# panel C
-	first <- aggregate(otu.subsampled[,most.imp.otus[1]]/nseqs, by=list(md$SP, md$ET), median)
-	first.pl <- first[first$Group.1=="PL", "x"]
-	first.pmg <- first[first$Group.1=="PMG", "x"]
-	first.med <- median(first$x)
-	
-	second <- aggregate(otu.subsampled[,most.imp.otus[2]]/nseqs, by=list(md$SP, md$ET), median)
-	second.pl <- second[second$Group.1=="PL", "x"]
-	second.pmg <- second[second$Group.1=="PMG", "x"]
-	second.med <- median(second$x)
-	
-	third <- aggregate(otu.subsampled[,most.imp.otus[3]]/nseqs, by=list(md$SP, md$ET), median)
-	third.pl <- third[third$Group.1=="PL", "x"]
-	third.pmg <- third[third$Group.1=="PMG", "x"]
-	third.med <- median(third$x)
-	par(mar=c(8, 5, 0.5, 0.5))
-	
-	plot(1, xlim=c(0, 1.5), ylim=c(0,0.015), type="n", xaxt="n", yaxt="n", xlab="", ylab="Relative abundance (%)")
-	
-	stripchart(at=0.15, first.pl, vertical=T, method="jitter", pch=21, bg="white", add=T, jitter=0.05)
-	stripchart(at=0.35, first.pmg, vertical=T, method="jitter", pch=21, bg="black", add=T, jitter=0.05)
-	segments(x0=0.10, x1=0.20, y0=median(first.pl), lwd=3)
-	segments(x0=0.30, x1=0.40, y0=median(first.pmg), lwd=3)
-	
-	stripchart(at=0.65, second.pl, vertical=T, method="jitter", pch=21, bg="white", add=T, jitter=0.05)
-	stripchart(at=0.85, second.pmg, vertical=T, method="jitter", pch=21, bg="black", add=T, jitter=0.05)
-	segments(x0=0.6, x1=0.7, y0=median(second.pl), lwd=3)
-	segments(x0=0.8, x1=0.9, y0=median(second.pmg), lwd=3)
-		
-	stripchart(at=1.15, third.pl, vertical=T, method="jitter", pch=21, bg="white", add=T, jitter=0.05)
-	stripchart(at=1.35, third.pmg, vertical=T, method="jitter", pch=21, bg="black", add=T, jitter=0.05)
-	segments(x0=1.1, x1=1.2, y0=median(third.pl), lwd=3)
-	segments(x0=1.3, x1=1.4, y0=median(third.pmg), lwd=3)
-	
-	otu.labels <- gsub("Otu0{1,}", "OTU ", most.imp.otus)
+# panel B
+pl <- numeric()
+pmg <- numeric()
+between <- numeric()
 
-	axis(1, at=c(0.25, 0.75, 1.25), label=paste0(most.imp.taxa[1:3], "\n(", otu.labels, ")"), las=2, tick=F)
-	axis(2, at=seq(0,0.025, 0.005), label=format(seq(0,2.5, 0.5), digits=1), las=1)
-	
-	mtext(side=2, at=0.0152, line=2.5, cex=1.25, las=1, font=2, text="C")
-
+pl.et <- factor(md[md$SP=="PL", "ET"])
+thetayc <- as.matrix(thetayc)
+for(et in pl.et){
+	pl[et] <- median(unlist(thetayc[md$ET==et, md$ET!=et]))
+	between[et] <- median(unlist(thetayc[md$ET==et, md$SP!="PL"]))
 }
 
-figure2()
+pmg.et <- factor(md[md$SP=="PMG", "ET"])
+for(et in pmg.et){
+	pmg[et] <- median(unlist(thetayc[md$ET==et, md$ET!=et]))
+	between[et] <- median(unlist(thetayc[md$ET==et, md$SP!="PMG"]))
+}
+
+par(mar=c(0, 5, 0.5, 0.5))
+stripchart(at=1, pl, vertical=T, method="jitter", jitter=0.3, xlim=c(0.5,3.5), ylim=c(0,1.0), yaxt="n", pch=21, bg="white", ylab=expression(paste("Median ", theta["YC"], " distance", sep=" ")))
+stripchart(at=2, pmg, vertical=T, method="jitter", jitter=0.3, add=T, pch=19, col="black")
+stripchart(at=3, between, vertical=T, method="jitter", jitter=0.3, add=T, pch=19, col="gray")
+#axis(1, at=1:3, label=c("Among\nP. leucopis", "Among\nP. maniculatus\ngracilis", "Between\nspecies"), las=2, tick=F)
+axis(2, las=2)
+segments(x0=c(0.6, 1.6, 2.6), x1=c(1.4, 2.4, 3.4), y0=c(median(pl), median(pmg), median(pmg)), y1=c(median(pl), median(pmg), median(pmg)), lwd=4, lty=1)
+mtext(side=2, at=1.0, line=2.5, cex=1.25, las=1, font=2, text="B")
+
+	
+
+weighted <- as.matrix(weighted)
+
+pl <- numeric()
+pmg <- numeric()
+between <- numeric()
+
+pl.et <- factor(md[md$SP=="PL", "ET"])
+for(et in pl.et){
+	pl[et] <- median(unlist(weighted[md$ET==et, md$ET!=et]))
+		between[et] <- median(unlist(weighted[md$ET==et, md$SP!="PL"]))
+}
+
+pmg.et <- factor(md[md$SP=="PMG", "ET"])
+for(et in pmg.et){
+	pmg[et] <- median(unlist(weighted[md$ET==et, md$ET!=et]))
+	between[et] <- median(unlist(weighted[md$ET==et, md$SP!="PMG"]))
+}
+
+par(mar=c(8, 5, 0.5, 0.5))
+stripchart(at=1, pl, vertical=T, method="jitter", jitter=0.3, xlim=c(0.5,3.5), ylim=c(0,1.0), yaxt="n", pch=21, bg="white", ylab="Median weighted\nUniFrac distance")
+stripchart(at=2, pmg, vertical=T, method="jitter", jitter=0.3, add=T, pch=19, col="black")
+stripchart(at=3, between, vertical=T, method="jitter", jitter=0.3, add=T, pch=19, col="gray")
+axis(1, at=1:3, label=c("Among\nP. leucopis", "Among\nP. maniculatus\ngracilis", "Between\nspecies"), las=2, tick=F)
+axis(2, las=2)
+segments(x0=c(0.6, 1.6, 2.6), x1=c(1.4, 2.4, 3.4), y0=c(median(pl), median(pmg), median(pmg)), y1=c(median(pl), median(pmg), median(pmg)), lwd=4, lty=1)
+#mtext(side=2, at=1.0, line=2.5, cex=1.25, las=1, font=2, text="B")
+
+
+# panel C
+first <- aggregate(otu.subsampled[,most.imp.otus[1]]/nseqs, by=list(md$SP, md$ET), median)
+first.pl <- first[first$Group.1=="PL", "x"]
+first.pmg <- first[first$Group.1=="PMG", "x"]
+first.med <- median(first$x)
+
+second <- aggregate(otu.subsampled[,most.imp.otus[2]]/nseqs, by=list(md$SP, md$ET), median)
+second.pl <- second[second$Group.1=="PL", "x"]
+second.pmg <- second[second$Group.1=="PMG", "x"]
+second.med <- median(second$x)
+
+third <- aggregate(otu.subsampled[,most.imp.otus[3]]/nseqs, by=list(md$SP, md$ET), median)
+third.pl <- third[third$Group.1=="PL", "x"]
+third.pmg <- third[third$Group.1=="PMG", "x"]
+third.med <- median(third$x)
+par(mar=c(8, 5, 0.5, 0.5))
+
+plot(1, xlim=c(0, 1.5), ylim=c(0,0.015), type="n", xaxt="n", yaxt="n", xlab="", ylab="Relative abundance (%)")
+
+stripchart(at=0.15, first.pl, vertical=T, method="jitter", pch=21, bg="white", add=T, jitter=0.05)
+stripchart(at=0.35, first.pmg, vertical=T, method="jitter", pch=21, bg="black", add=T, jitter=0.05)
+segments(x0=0.10, x1=0.20, y0=median(first.pl), lwd=3)
+segments(x0=0.30, x1=0.40, y0=median(first.pmg), lwd=3)
+
+stripchart(at=0.65, second.pl, vertical=T, method="jitter", pch=21, bg="white", add=T, jitter=0.05)
+stripchart(at=0.85, second.pmg, vertical=T, method="jitter", pch=21, bg="black", add=T, jitter=0.05)
+segments(x0=0.6, x1=0.7, y0=median(second.pl), lwd=3)
+segments(x0=0.8, x1=0.9, y0=median(second.pmg), lwd=3)
+	
+stripchart(at=1.15, third.pl, vertical=T, method="jitter", pch=21, bg="white", add=T, jitter=0.05)
+stripchart(at=1.35, third.pmg, vertical=T, method="jitter", pch=21, bg="black", add=T, jitter=0.05)
+segments(x0=1.1, x1=1.2, y0=median(third.pl), lwd=3)
+segments(x0=1.3, x1=1.4, y0=median(third.pmg), lwd=3)
+
+otu.labels <- gsub("Otu0{1,}", "OTU ", most.imp.otus)
+
+axis(1, at=c(0.25, 0.75, 1.25), label=paste0(most.imp.taxa[1:3], "\n(", otu.labels, ")"), las=2, tick=F)
+axis(2, at=seq(0,0.025, 0.005), label=format(seq(0,2.5, 0.5), digits=1), las=1)
+
+mtext(side=2, at=0.0152, line=2.5, cex=1.25, las=1, font=2, text="C")
 ```
 
-We observed one (`r n.sig.tests`) OTU that was significantly different between the two species. This OTU affiliated among the unclassified members of the family _`r sig.taxon`_ (Figure 2C). Furthermore, among all of the OTUs, this OTU provided the greatest mean decrease in accuracy (MDA=`r format(most.imp.mda[[1]], digits=3)`) when we used the random forest machine-learning algorithm to distinguish between the _Peromyscus_ species. The next two OTUs which resulted in the greated mean decrease in accuracy were an OTU associated with the _`r most.imp.taxa[2]`_ and _`r most.imp.taxa[3]`_ (MDA=`r format(most.imp.mda[2], digits=3)` and `r format(most.imp.mda[3], digits=3)`, respectively). For the random forest feature selection procedure, we observed an out of bag error rate of `r format(oob.error, digits=3)`% suggesting that it was not possible to reliably use these OTUs to correctly classify the communities found in the two species of mice. Thus there was a lack of clear support for a differentiation in specific members of the _Peromyscus_ species’ microbiotas that parallels that of their host species.
+We observed one (`r n.sig.tests`) OTU that was significantly different between the two species. This OTU affiliated among the unclassified members of the family _`r sig.taxon`_ (Figure 2C). Furthermore, among all of the OTUs, this OTU provided the greatest mean decrease in accuracy (MDA=`r round(most.imp.mda[[1]], digits=1)`) when we used the random forest machine-learning algorithm to distinguish between the _Peromyscus_ species. The next two OTUs which resulted in the greated mean decrease in accuracy were an OTU associated with the _`r most.imp.taxa[2]`_ and _`r most.imp.taxa[3]`_ (MDA=`r round(most.imp.mda[2], digits=1)` and `r round(most.imp.mda[3], digits=1)`, respectively). For the random forest feature selection procedure, we observed an out of bag error rate of `r round(oob.error, digits=1)`% suggesting that it was not possible to reliably use these OTUs to correctly classify the communities found in the two species of mice. Thus there was a lack of clear support for a differentiation in specific members of the _Peromyscus_ species’ microbiotas that parallels that of their host species.
 
 ```{r}
 ##OTU-based data
@@ -754,7 +749,7 @@ axis(2, at=seq(length(phylo.mc.medians):1), label=gsub("_", " ", phylo.taxa[coln
 text(x=0.8, y=length(phylo.mc.medians), label="B", cex=2, font=2)
 ```
 
-One striking feature of the communities observed between the mice was the large amount of variation in the composition of their gut microbiota. We observed a total of `r total.n.otus` OTUs among all of the mice; however, the median number of OTUs observed in each mouse was `r otu.distribution["50%"]` (95% confidence interval=`r otu.distribution["2.5%"]`-`r otu.distribution["97.5%"]`). Across all of the OTUs, `r notus.presentAll` OTUs were present in every sample, but `r notus.present90` were observed in at least 90% of the mice (Figure 3A). The latter set of OTUs affiliated with `r length(otu_names.present90)` different taxa and represented `r format(otu.percent.present90, digits=3)`% of all of the 16S rRNA gene sequences sampled from the mice (Figure 3A). These OTUs did not overlap with the two OTUs that were identified as being significantly different between the two species of mice (N=`r length(intersect(most.imp.otus, otu.present90))`). We next considered the taxonomic diversity of bacterial genera. Among the `r total.n.phylos` genera that were observed, `r nphylo.present90` were observed in at least 90% of the mice and `r nphylo.presentAll` were observed in every mouse sampled (Figure 3B). Those genera found in at least 90% of the mice represented `r format(phylo.percent.present90, digits=3)`% of all sequences sampled and those found in every animal represented `r format(phylo.percent.presentAll, digits=3)`% of all sequences sampled. Within each animal we identified the dominant genus and observed that _`r names.dominant[1]`_ was the dominant genus in `r format(percent.dominant[1], digits=3)`% of the mice followed by _`r names.dominant[2]`_ (`r format(percent.dominant[2], digits=3)`%) and _`r names.dominant[3]`_ (`r format(percent.dominant[3], digits=3)`%). These results demonstrate that among the _Peromyscus_ spp. animals that we sampled, there was a conserved taxonomic core.
+One striking feature of the communities observed between the mice was the large amount of variation in the composition of their gut microbiota. We observed a total of `r total.n.otus` OTUs among all of the mice; however, the median number of OTUs observed in each mouse was `r otu.distribution["50%"]` (95% confidence interval=`r otu.distribution["2.5%"]`-`r otu.distribution["97.5%"]`). Across all of the OTUs, `r notus.presentAll` OTUs were present in every sample, but `r notus.present90` were observed in at least 90% of the mice (Figure 3A). The latter set of OTUs affiliated with `r length(otu_names.present90)` different taxa and represented `r round(otu.percent.present90, digits=1)`% of all of the 16S rRNA gene sequences sampled from the mice (Figure 3A). These OTUs did not overlap with the two OTUs that were identified as being significantly different between the two species of mice (N=`r length(intersect(most.imp.otus, otu.present90))`). We next considered the taxonomic diversity of bacterial genera. Among the `r total.n.phylos` genera that were observed, `r nphylo.present90` were observed in at least 90% of the mice and `r nphylo.presentAll` were observed in every mouse sampled (Figure 3B). Those genera found in at least 90% of the mice represented `r round(phylo.percent.present90, digits=1)`% of all sequences sampled and those found in every animal represented `r round(phylo.percent.presentAll, digits=1)`% of all sequences sampled. Within each animal we identified the dominant genus and observed that _`r names.dominant[1]`_ was the dominant genus in `r round(percent.dominant[1], digits=1)`% of the mice followed by _`r names.dominant[2]`_ (`r round(percent.dominant[2], digits=1)`%) and _`r names.dominant[3]`_ (`r round(percent.dominant[3], digits=1)`%). These results demonstrate that among the _Peromyscus_ spp. animals that we sampled, there was a conserved taxonomic core.
 
 
 ### Effects of host physiology on diversity and richness
@@ -936,11 +931,13 @@ mtext(side=2, at=5.14, las=1, line=3, text="B", cex=1.25, font=2)
 legend(x=15, y=0.75, legend=c("P. leucopus", "P. maniculatus gracilis"), pt.bg=c("white", "black"), text.font=3, pch=21, cex=0.8)
 ```
 
-We next tested how differences in sex, reproductive condition, and age affected the gut microbiota of _Peromyscus_. We were unable to detect a sex-based difference in the richness (P=`r format(sobs.anova[[2]][[1]]$"Pr(>F)"[2], digits=2)`), Shannon diversity (P=`r format(shannon.anova[[2]][[1]]$"Pr(>F)"[2], digits=2)`), phylogenetic diversity (P=`r format(pd.anova[[2]][[1]]$"Pr(>F)"[2], digits=2)`), or community structure (AMOVA; P~θ~=`r format(thetayc.adonis$aov.tab$"Pr(>F)"[2], digits=2)`; P~W~=`r format(weighted.adonis$aov.tab$"Pr(>F)"[2], digits=2)`) of the _Peromyscus_ spp. microbiota. To investigate possible sex-based differences further, we focused on sexually mature adult males and females, which had descended testes and emerged nipples, respectively; however, we were unable to identify a sex-based effect on the richness (P=`r format(sm.sobs[[2]][[1]]$"Pr(>F)"[1], digits=2)`), Shannon diversity (P=`r format(sm.shannon[[2]][[1]]$"Pr(>F)"[1], digits=2)`), phylogenetic diversity (P=`r format(sm.pd[[2]][[1]]$"Pr(>F)"[1], digits=2)`), or community structure (AMOVA; P~θ~=`r format(sm.sex.thetayc$aov.tab$"Pr(>F)"[1], digits=2)`; P~W~=`r format(sm.sex.weighted$aov.tab$"Pr(>F)"[1], digits=2)`). Furthermore, none of the OTUs that appeared in at least half of the samples were differentially enriched in either sex. Stratification of the mice into the age categories of juvenile (N=`r n.age["J"]`), adolescent (N=`r n.age["SA"]`), and adult (N=`r n.age["A"]`) did reveal marginal differences in the richness (P=`r format(sobs.age[[2]][[1]]$"Pr(>F)"[1], digits=2)`) and diversity (P=`r format(shannon.age[[2]][[1]]$"Pr(>F)"[1], digits=2)`) between the cohorts but not their phylogenetic diversity (P=`r format(pd.age[[2]][[1]]$"Pr(>F)"[1], digits=2)`; Figure 4A). The overall trend was for older mice to have a more rich and complex community relative. This was paralleled by a modest correlation between the animals’ weight and their Shannon diversity (Spearman’s rho=`r format(spearman.wt.shannon$estimate, digits=2)`, P=`r format(round(spearman.wt.shannon$p.value, digits=3), digits=2)`; Figure 4B). Although there did appear to be some effect of age on the richness and diversity of the communities, it was difficult to ascribe much biological significance to these differences considering the differences in overall community structure were not significantly different from each other (AMOVA; P~θ~=`r format(age.thetayc$aov.tab$"Pr(>F)"[1], digits=2)`; P~W~=`r format(age.weighted$aov.tab$"Pr(>F)"[1], digits=2)`) and there were no OTUs that were differentially abundant between the three age categories. Overall, by the parameters we were able to measure, we were unable to detect a robust effect of host physiology on their microbiota.
+We next tested how differences in sex, reproductive condition, and age affected the gut microbiota of _Peromyscus_. We were unable to detect a sex-based difference in the richness (P=`r round(sobs.anova[[2]][[1]]$"Pr(>F)"[2], digits=2)`), Shannon diversity (P=`r round(shannon.anova[[2]][[1]]$"Pr(>F)"[2], digits=2)`), phylogenetic diversity (P=`r round(pd.anova[[2]][[1]]$"Pr(>F)"[2], digits=2)`), or community structure (AMOVA; P~θ~=`r round(thetayc.adonis$aov.tab$"Pr(>F)"[2], digits=2)`; P~W~=`r round(weighted.adonis$aov.tab$"Pr(>F)"[2], digits=2)`) of the _Peromyscus_ spp. microbiota. To investigate possible sex-based differences further, we focused on sexually mature adult males and females, which had descended testes and emerged nipples, respectively; however, we were unable to identify a sex-based effect on the richness (P=`r round(sm.sobs[[2]][[1]]$"Pr(>F)"[1], digits=2)`), Shannon diversity (P=`r round(sm.shannon[[2]][[1]]$"Pr(>F)"[1], digits=2)`), phylogenetic diversity (P=`r round(sm.pd[[2]][[1]]$"Pr(>F)"[1], digits=2)`), or community structure (AMOVA; P~θ~=`r round(sm.sex.thetayc$aov.tab$"Pr(>F)"[1], digits=2)`; P~W~=`r round(sm.sex.weighted$aov.tab$"Pr(>F)"[1], digits=2)`). Furthermore, none of the OTUs that appeared in at least half of the samples were differentially enriched in either sex. Stratification of the mice into the age categories of juvenile (N=`r n.age["J"]`), adolescent (N=`r n.age["SA"]`), and adult (N=`r n.age["A"]`) did reveal marginal differences in the richness (P=`r round(sobs.age[[2]][[1]]$"Pr(>F)"[1], digits=2)`) and diversity (P=`r round(shannon.age[[2]][[1]]$"Pr(>F)"[1], digits=2)`) between the cohorts but not their phylogenetic diversity (P=`r round(pd.age[[2]][[1]]$"Pr(>F)"[1], digits=2)`; Figure 4A). The overall trend was for older mice to have a more rich and complex community relative. This was paralleled by a modest correlation between the animals’ weight and their Shannon diversity (Spearman’s rho=`r round(spearman.wt.shannon$estimate, digits=2)`, P=`r round(round(spearman.wt.shannon$p.value, digits=3), digits=2)`; Figure 4B). Although there did appear to be some effect of age on the richness and diversity of the communities, it was difficult to ascribe much biological significance to these differences considering the differences in overall community structure were not significantly different from each other (AMOVA; P~θ~=`r round(age.thetayc$aov.tab$"Pr(>F)"[1], digits=2)`; P~W~=`r round(age.weighted$aov.tab$"Pr(>F)"[1], digits=2)`) and there were no OTUs that were differentially abundant between the three age categories. Overall, by the parameters we were able to measure, we were unable to detect a robust effect of host physiology on their microbiota.
 
 ### Location of sampling was not associated with variation in microbiota
 
 ```{r}
+
+#look at relationship between community structure distance and geographic distance
 location.thetayc <- mantel(thetayc, distance.matrix, method="spearman", permutations=perm)
 location.thetayc
 
@@ -955,6 +952,7 @@ location.weighted
 #       Significance: 0.81932 
 
 
+#look at difference in variationd within and between sampling stations
 getIntraInterSiteDist <- function(distance, metadata){
 
 	nsamples <- nrow(metadata)
@@ -984,8 +982,6 @@ theta.inter_intra.wilcox <- wilcox.test(theta.inter_intra$intra, theta.inter_int
 weighted.inter_intra <- getIntraInterSiteDist(weighted, md)
 weighted.inter_intra.wilcox <- wilcox.test(weighted.inter_intra$intra, weighted.inter_intra$inter)
 # W = 117469.5, p-value = 0.9406
-
-
 ```
 
 Next, we hypothesized that animals collected from the same environment would be more likely to share a similar microbiota than animals collected from different environments. For this analysis, we used the sampling coordinates to define the animals’ environment (Figure 1). When we performed a Mantel test to test for the association between the distance between the sampling points and the β-diversity between the gut microbiotas, we failed to detect a significant association (M~θ~=`r round(location.thetayc$statistic, digits=2)`, P~θ~=`r round(location.thetayc$signif, digits=2)`; M~W~=`r round(location.weighted$statistic, digits=2)`, P~W~=`r round(location.weighted$signif, digits=2)`; `r perm` permutations). To test for a more localized habitat effect we compared the distances collected at the same site to those collected at different sites and again failed to detect a meaningful effect (Wilcoxon-test, P~θ~=`r round(theta.inter_intra.wilcox$p.value, digits=2)`; P~W~=`r round(weighted.inter_intra.wilcox$p.value, digits=2)`). These results suggest the lack of a geographic or habitat-based effect on the _Peromyscus_ spp. microbiota.
