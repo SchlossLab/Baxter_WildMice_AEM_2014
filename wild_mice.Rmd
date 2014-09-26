@@ -3,6 +3,8 @@ title: "Intra- and inter-individual variation masks inter-species variation in t
 author: "Nielson T. Baxter & Patrick D. Schloss"
 date: ""
 output: html_document
+    keep_md: yes
+
 ---
 
 ## Introduction
