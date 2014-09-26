@@ -4,6 +4,7 @@
 mothur*logfile
 *.analysis/
 figures/
+*.log
 
 #R files
 .Rproj.user
