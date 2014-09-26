@@ -23,7 +23,7 @@ for (dep in deps){
 
 sessionInfo()
 
-perm = 1e2
+perm = 1e4
 ```
 
 To convert the R markdown to html (or any other format), you'll also need to install the [SRA tools package](http://www.ncbi.nlm.nih.gov/books/NBK158900/) and have a live internet connection. You can make the conversion using the [knitr package](http://yihui.name/knitr/) from within R:
