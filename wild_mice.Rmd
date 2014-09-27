@@ -69,6 +69,11 @@ rm -rf silva.bacteria __MACOSX Silva.bacteria.zip
 
 mothur "#pcr.seqs(fasta=silva.bacteria.fasta, start=11894, end=25319, keepdots=F, processors=8)"
 mv silva.bacteria.pcr.fasta silva.v4.fasta
+
+wget http://www.mothur.org/w/images/1/1a/Silva.eukarya.zip
+unzip *zip
+mv silva.eukarya/silva.eukarya.fasta ./
+rm -rf silva.eukarya __MACOSX Silva.eukarya.zip
 ```
 
 We'll need to get ahold of the RDP's classification training set that is based on the 16S rRNA gene:
