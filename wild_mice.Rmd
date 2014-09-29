@@ -150,7 +150,7 @@ mv *.sra *.fastq SRP044050_info.csv sra_files
 First, we'll analyze the 16S rRNA gene sequence data and put all of the resulting files into a folder called `16S.analysis`. These commands come from the outline described in the [MiSeq SOP](http://www.mothur.org/wiki/MiSeq_SOP).
 
 ```{r, engine='bash', cache=TRUE}
-mothur "#unique.seqs(fasta=wild_mice.16S.trim.contigs.fasta);
+echo "unique.seqs(fasta=wild_mice.16S.trim.contigs.fasta);
 summary.seqs(fasta=current, processors=8);
 screen.seqs(fasta=current, name=current, group=wild_mice.16S.contigs.groups, summary=current, maxambig=0, maxhomop=8, maxlength=275);
 count.seqs(name=current, group=current);
@@ -175,16 +175,19 @@ make.shared(list=current, count=current, label=1);
 classify.otu(list=current, taxonomy=current, label=1);
 
 dist.seqs(fasta=current, output=lt);
-clearcut();
+clearcut();" > mothur.16S.batch
 
-system(mkdir 16S.analysis);
-system(mv *.16S.* 16S.analysis);"
+mothur mothur.16S.batch
+
+mkdir 16S.analysis
+mv *.16S.* 16S.analysis
 ```
 
 Next, we'll analyze the 18S rRNA gene sequence data and put all of the resulting files into a folder called `18S.analysis`. These commands come from the outline described in the [MiSeq SOP](http://www.mothur.org/wiki/MiSeq_SOP). Because the reads do not fully overlap, we know that our error rate will be significantly higher than that of the 16S rRNA gene sequence data we generated. Therefore, we will only use classification-based analyses. The purpose of sequencing the 18S rRNA gene was to allow us to see what the mice had been eating at the time we sampled their microbiota. Therefore, we remove a lot of sequences that wouldn't indicate components of their diet.
 
 ```{r, engine='bash', cache=TRUE}
-mothur "#screen.seqs(fasta=wild_mice.18S.trim.contigs.fasta, group=wild_mice.18S.contigs.groups, contigsreport=wild_mice.18S.contigs.report, maxambig=0, maxlength=450, minoverlap=20, maxhomop=8, processors=8);
+
+echo "screen.seqs(fasta=wild_mice.18S.trim.contigs.fasta, group=wild_mice.18S.contigs.groups, contigsreport=wild_mice.18S.contigs.report, maxambig=0, maxlength=450, minoverlap=20, maxhomop=8, processors=8);
 unique.seqs(fasta=current);
 count.seqs(name=current, group=current);
 align.seqs(fasta=current, reference=silva.eukarya.fasta);
@@ -201,10 +204,12 @@ classify.seqs(fasta=current, count=current, reference=v4.eukarya.fasta, taxonomy
 remove.lineage(fasta=current, count=current, taxonomy=current, taxon=Mammalia-Amoebozoa-Cryptophyceae-Excavata-SAR-Nematoda-Rotifera-Tardigrada-Archaeorhizomyces-LKM11-LKM15-uncultured-Chlorophyta-Eukaryota;unclassified;-Archaeplastida;unclassified-Eukaryota;Opisthokonta;Fungi;unclassified;-Opisthokonta;unclassified);
 phylotype(taxonomy=current);
 make.shared(list=current, count=current, label=1);
-classify.otu(list=current, count=current, taxonomy=current, label=1);
+classify.otu(list=current, count=current, taxonomy=current, label=1);" > 18S.mothur.batch
 
-system(mkdir 18S.analysis);
-system(mv *.18S.* 18S.analysis);"
+mothur 18S.mothur.batch
+
+mkdir 18S.analysis;
+mv *.18S.* 18S.analysis
 ```
 
 Viola! We're good to go. The main files that we will use from these pipelines will be:
@@ -362,8 +367,7 @@ write.table(file="wild.sex.design", cbind(as.character(sample), as.character(md$
 ```
 
 ```{r, engine='bash', cache=TRUE}
-mothur "#
-	sub.sample(shared=16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.an.unique_list.shared, size=4463);
+echo "sub.sample(shared=16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.an.unique_list.shared, size=4463);
 	sub.sample(shared=16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pds.wang.pick.tx.shared, size=4463);
 
 	summary.single(shared=current, subsample=4463, calc=sobs-shannon-nseqs, iters=100)
@@ -381,8 +385,9 @@ mothur "#
 
 dist.shared(shared=18S.analysis/wild_mice.18S.trim.contigs.good.unique.good.filter.unique.precluster.pick.eukarya.wang.pick.tx.shared, calc=thetayc, subsample=500, iters=100, output=square, processors=8)
 sub.sample(shared=18S.analysis/wild_mice.18S.trim.contigs.good.unique.good.filter.unique.precluster.pick.eukarya.wang.pick.tx.shared, size=500)
-get.communitytype(shared=current)
-"
+get.communitytype(shared=current)" > mothur.analysis.batch
+
+mothur mothur.analysis.batch
 ```
 
 ```{r}
