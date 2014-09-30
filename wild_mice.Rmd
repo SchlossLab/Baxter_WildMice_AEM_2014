@@ -52,14 +52,8 @@ The goal of this document is to give a blow-by-blow accounting for how the analy
 
 
 ## Data curation
-Let's start by setting up our work area with a folder called `wild_mice`:
 
-```{r, engine='bash', cache=TRUE}
-mkdir wild_mice
-cd wild_mice
-```
-
-We'll also need to get ahold of some reference files. First we'll get the SILVA-based bacterial and eukaryotic reference alignment and trim it to the V4 region of the 16S rRNA gene.
+Let's start by setting up our work area with a folder called `wild_mice`. We'll also need to get ahold of some reference files. First we'll get the SILVA-based bacterial reference alignment and trim it to the V4 region of the 16S rRNA gene.
 
 ```{r, engine='bash', cache=TRUE}
 wget http://www.mothur.org/w/images/9/98/Silva.bacteria.zip
