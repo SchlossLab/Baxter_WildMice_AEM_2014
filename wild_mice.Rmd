@@ -170,9 +170,9 @@ cluster.split(fasta=current, count=current, taxonomy=current, splitmethod=classi
 make.shared(list=current, count=current, label=0.03);
 classify.otu(list=current, count=current, taxonomy=current, label=0.03);
 
-phylotype(taxonomy=current);
-make.shared(list=current, count=current, label=1);
-classify.otu(list=current, taxonomy=current, label=1);
+phylotype(taxonomy=current, label=1);
+make.shared(list=current, count=current);
+classify.otu(list=current, taxonomy=current);
 
 dist.seqs(fasta=current, output=lt);
 clearcut();" > mothur.16S.batch
@@ -202,9 +202,9 @@ summary.seqs(fasta=current, count=current);
 
 classify.seqs(fasta=current, count=current, reference=v4.eukarya.fasta, taxonomy=v4.eukarya.tax, cutoff=80);
 remove.lineage(fasta=current, count=current, taxonomy=current, taxon=Mammalia-Amoebozoa-Cryptophyceae-Excavata-SAR-Nematoda-Rotifera-Tardigrada-Archaeorhizomyces-LKM11-LKM15-uncultured-Chlorophyta-Eukaryota;unclassified;-Archaeplastida;unclassified-Eukaryota;Opisthokonta;Fungi;unclassified;-Opisthokonta;unclassified);
-phylotype(taxonomy=current);
-make.shared(list=current, count=current, label=1);
-classify.otu(list=current, count=current, taxonomy=current, label=1);" > 18S.mothur.batch
+phylotype(taxonomy=current, label=1);
+make.shared(list=current, count=current);
+classify.otu(list=current, count=current, taxonomy=current);" > 18S.mothur.batch
 
 mothur 18S.mothur.batch
 
