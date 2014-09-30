@@ -10,7 +10,7 @@ output: html_document
 ## Introduction
 This is a digital notebook to accompany the paper titled, "Intra- and inter-individual variation masks inter-species variation in the microbiota of sympatric _Peromyscus_ populations" that will be published in *Applied & Environmental Microbiology*. It was written in [R markdown](http://rmarkdown.rstudio.com) and converted to html using the R knitr package. This enables us to embed the results of our analyses directly into the text to allow for a completely reproducible data analysis pipeline. A [github repository is available](https://github.com/schlossLab/wild_mice) where you can pull down your own version of the notebook to modify our analysis or adapt it to your analysis. 
 
-This document was generated using [mothur v.1.33](http://www.mothur.org/wiki) and [R](http://www.r-project.org):
+This document was generated using [mothur v.1.34](http://www.mothur.org/wiki) and [R](http://www.r-project.org):
 
 ```{r, warning=FALSE}
 
