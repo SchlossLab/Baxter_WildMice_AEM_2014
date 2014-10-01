@@ -362,8 +362,10 @@ write.table(file="wild.sex.design", cbind(as.character(sample), as.character(md$
 
 ```{r, engine='bash', cache=TRUE}
 echo "sub.sample(shared=16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.an.unique_list.shared, size=4463);
-	sub.sample(shared=16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pds.wang.pick.tx.shared, size=4463);
+	summary.single(shared=current, subsample=4463, calc=sobs-shannon-nseqs, iters=100)
+	dist.shared(shared=current, calc=thetayc, subsample=4463, iters=100, output=square, processors=8)
 
+	sub.sample(shared=16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pds.wang.pick.tx.shared, size=4463);
 	summary.single(shared=current, subsample=4463, calc=sobs-shannon-nseqs, iters=100)
 	dist.shared(shared=current, calc=thetayc, subsample=4463, iters=100, output=square, processors=8)
 	
