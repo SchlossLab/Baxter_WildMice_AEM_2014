@@ -386,7 +386,7 @@ echo "sub.sample(shared=16S.analysis/wild_mice.16S.trim.contigs.unique.good.good
 mothur mothur.analysis.batch
 ```
 
-```{r}
+```{r, cache=FALSE}
 
 # otu.alpha diversity analysis
 otu.alpha <- read.table(file="16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.an.unique_list.0.03.subsample.groups.ave-std.summary", header=T)
@@ -451,7 +451,7 @@ n.dmms <- which.min(dmm.fit$Laplace)
 ```
 We compared the fecal communities between the two host species to test whether the genetic differences between the two animal species would translate into differences in their microbiotas. Using a variety of statistical tests, we were unable to detect a meaningful difference between the two species. First, there was not a significant difference in the richness (P=`r round(sobs.anova[[2]][[1]]$"Pr(>F)"[1], digits=2)`), Shannon diversity (P=`r round(shannon.anova[[2]][[1]]$"Pr(>F)"[1], digits=2)`), or phylogenetic diversity (P=`r round(pd.anova[[2]][[1]]$"Pr(>F)"[1], digits=2)`) between the two species of mice (Figure 2A). Second, there was not a significant difference in the community structures of the microbiota characterized from the two species (AMOVA; P~θ~=`r round(thetayc.adonis$aov.tab$"Pr(>F)"[1], digits=2)`; P~W~=`r round(weighted.adonis$aov.tab$"Pr(>F)"[1], digits=2)`). Third, there was not a significant difference in the variation of their community structure within the microbiota characterized from the two species (HOMOVA; P~θ~=`r round(theta.homova[,3], digits=2)`; P~W~=`r round(weighted.homova[,3], digits=2)`). Finally, when we attempted to fit the OTU abundance data to DMM models, there was no support for more than one (`r n.dmms`) community type. In each of these comparisons, the level of variation across mice within either species was considerable (Figure 2B).
 
-```{r, warning=FALSE}
+```{r, cache=FALSE, warning=FALSE}
 otu.subsampled <-read.table(file="16S.analysis/wild_mice.16S.trim.contigs.unique.good.good.filter.unique.precluster.pick.pick.an.unique_list.0.03.subsample.shared", header=T, row.names=2)
 otu.subsampled <- otu.subsampled[,-c(1,2)]
 rownames(otu.subsampled) <- gsub("_16S", "", rownames(otu.subsampled))
@@ -784,7 +784,7 @@ One striking feature of the communities observed between the mice was the large 
 
 ### Effects of host physiology on diversity and richness
 
-```{r}
+```{r, cache=FALSE}
 #Was there a sex-base difference between sexually mature animals?
 #Reprodutive condition: for females either NT (nipples tiny) or NE (nipples emerged=mature).
 #For males either ABD (testes abdominal) or SCR (testes scrotal=mature)
@@ -960,7 +960,7 @@ We next tested how differences in sex, reproductive condition, and age affected 
 
 ### Location of sampling was not associated with variation in microbiota
 
-```{r}
+```{r, cache=FALSE}
 #look at relationship between community structure distance and geographic distance
 location.thetayc <- mantel(thetayc, distance.matrix, method="spearman", permutations=perm)
 location.thetayc
@@ -1009,7 +1009,7 @@ Next, we hypothesized that animals collected from the same environment would be 
 
 ### Diet was not associated with variation in microbiota
 
-```{r}
+```{r, cache=FALSE}
 food <- read.table(file="18S.analysis/wild_mice.18S.trim.contigs.good.unique.good.filter.unique.precluster.pick.eukarya.wang.pick.tx.thetayc.1.square.ave.dist", skip=1, row.names=1)
 rownames(food) <- gsub("_18S", "", rownames(food))
 colnames(food) <- rownames(food)
@@ -1043,7 +1043,7 @@ weighted.food.mantel
 
 To test the role of diet in shaping the _Peromyscus_ species gut microbiota, we characterized the dietary contents of each PL and PMG sample using 18S rRNA sequencing. The diets of PL and PMG consisted of plant material (e.g. seeds, nuts, fruits, and green vegetation), arthropods, and fungi. Our 18S rRNA gene sequencing data confirmed previous results (26). We removed sequences outside of these broad taxonomic groups to minimize the contributions of microeukaryotic members of the gut microbiota. First, we tested for a difference in diet composition based on _Peromyscus_ species. We failed to find a significant difference in the structure of the diets when using AMOVA with correction for repeated measures (P`r ifelse(diet.species.adonis$aov.tab$"Pr(>F)"[1]==1, ">0.99", round(diet.species.adonis$aov.tab$"Pr(>F)"[1]==1, digits=2))`). Second, using the Mantel test we failed to identify a significant association between the distances between samples based on their bacterial community structure and the distances based on the structure of their diet (M~θ~=`r round(theta.food.mantel$statistic, digits=2)`, P~θ~=`r round(theta.food.mantel$signif, digits=2)`; M~W~=`r round(weighted.food.mantel$statistic, digits=2)`, P~W~=`r round(weighted.food.mantel$signif, digits=2)`; `r perm` permutations). Both analyses suggest the lack of an association between the structures of the diet and microbiota.
 
-```{r}
+```{r, cache=FALSE}
 food <- read.table(file="18S.analysis/wild_mice.18S.trim.contigs.good.unique.good.filter.unique.precluster.pick.eukarya.wang.pick.tx.1.subsample.shared", header=T, row.names=2)
 food <- food[,-c(1,2)]
 rownames(food) <- gsub("_18S", "", rownames(food))
