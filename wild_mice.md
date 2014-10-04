@@ -561,9 +561,9 @@ thetayc.adonis
 ## Terms added sequentially (first to last)
 ## 
 ##               Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)
-## md$SP          1     0.792 0.79228  2.1854 0.01938 0.2647
-## md$Sex         1     0.582 0.58234  1.6063 0.01424 0.2668
-## md$SP:md$Sex   1     0.716 0.71619  1.9755 0.01752 0.4028
+## md$SP          1     0.792 0.79228  2.1854 0.01938 0.2755
+## md$Sex         1     0.582 0.58234  1.6063 0.01424 0.2715
+## md$SP:md$Sex   1     0.716 0.71619  1.9755 0.01752 0.4066
 ## Residuals    107    38.791 0.36253         0.94886       
 ## Total        110    40.882                 1.00000
 ```
@@ -589,9 +589,9 @@ weighted.adonis
 ## Terms added sequentially (first to last)
 ## 
 ##               Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)
-## md$SP          1    0.3051 0.305097  4.1474 0.03626 0.3367
-## md$Sex         1    0.1083 0.108284  1.4720 0.01287 0.3301
-## md$SP:md$Sex   1    0.1292 0.129192  1.7562 0.01535 0.2744
+## md$SP          1    0.3051 0.305097  4.1474 0.03626 0.3234
+## md$Sex         1    0.1083 0.108284  1.4720 0.01287 0.3269
+## md$SP:md$Sex   1    0.1292 0.129192  1.7562 0.01535 0.2601
 ## Residuals    107    7.8712 0.073563         0.93551       
 ## Total        110    8.4138                  1.00000
 ```
@@ -609,7 +609,7 @@ dmm.fit <- read.table(file = "16S.analysis/wild_mice.16S.trim.contigs.unique.goo
     header = T)
 n.dmms <- which.min(dmm.fit$Laplace)
 ```
-We compared the fecal communities between the two host species to test whether the genetic differences between the two animal species would translate into differences in their microbiotas. Using a variety of statistical tests, we were unable to detect a meaningful difference between the two species. First, there was not a significant difference in the richness (P=0.47), Shannon diversity (P=0.57), or phylogenetic diversity (P=0.86) between the two species of mice (Figure 2A). Second, there was not a significant difference in the community structures of the microbiota characterized from the two species (AMOVA; P~θ~=0.26; P~W~=0.34). Third, there was not a significant difference in the variation of their community structure within the microbiota characterized from the two species (HOMOVA; P~θ~=0.38; P~W~=0.16). Finally, when we attempted to fit the OTU abundance data to DMM models, there was no support for more than one (1) community type. In each of these comparisons, the level of variation across mice within either species was considerable (Figure 2B).
+We compared the fecal communities between the two host species to test whether the genetic differences between the two animal species would translate into differences in their microbiotas. Using a variety of statistical tests, we were unable to detect a meaningful difference between the two species. First, there was not a significant difference in the richness (P=0.47), Shannon diversity (P=0.57), or phylogenetic diversity (P=0.86) between the two species of mice (Figure 2A). Second, there was not a significant difference in the community structures of the microbiota characterized from the two species (AMOVA; P~θ~=0.28; P~W~=0.32). Third, there was not a significant difference in the variation of their community structure within the microbiota characterized from the two species (HOMOVA; P~θ~=0.38; P~W~=0.16). Finally, when we attempted to fit the OTU abundance data to DMM models, there was no support for more than one (1) community type. In each of these comparisons, the level of variation across mice within either species was considerable (Figure 2B).
 
 
 ```r
