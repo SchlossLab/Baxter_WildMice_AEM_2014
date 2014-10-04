@@ -561,9 +561,9 @@ thetayc.adonis
 ## Terms added sequentially (first to last)
 ## 
 ##               Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)
-## md$SP          1     0.792 0.79228  2.1854 0.01938 0.2598
-## md$Sex         1     0.582 0.58234  1.6063 0.01424 0.2705
-## md$SP:md$Sex   1     0.716 0.71619  1.9755 0.01752 0.3943
+## md$SP          1     0.792 0.79228  2.1854 0.01938 0.2647
+## md$Sex         1     0.582 0.58234  1.6063 0.01424 0.2668
+## md$SP:md$Sex   1     0.716 0.71619  1.9755 0.01752 0.4028
 ## Residuals    107    38.791 0.36253         0.94886       
 ## Total        110    40.882                 1.00000
 ```
@@ -589,9 +589,9 @@ weighted.adonis
 ## Terms added sequentially (first to last)
 ## 
 ##               Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)
-## md$SP          1    0.3051 0.305097  4.1474 0.03626 0.3403
-## md$Sex         1    0.1083 0.108284  1.4720 0.01287 0.3394
-## md$SP:md$Sex   1    0.1292 0.129192  1.7562 0.01535 0.2732
+## md$SP          1    0.3051 0.305097  4.1474 0.03626 0.3367
+## md$Sex         1    0.1083 0.108284  1.4720 0.01287 0.3301
+## md$SP:md$Sex   1    0.1292 0.129192  1.7562 0.01535 0.2744
 ## Residuals    107    7.8712 0.073563         0.93551       
 ## Total        110    8.4138                  1.00000
 ```
@@ -1332,7 +1332,7 @@ legend(x = 15, y = 0.75, legend = c("P. leucopus", "P. maniculatus gracilis"),
 
 <img src="figures/figure4.pdf" title="plot of chunk figure4" alt="plot of chunk figure4" style="display: block; margin: auto;" />
 
-We next tested how differences in sex, reproductive condition, and age affected the gut microbiota of the *Peromyscus* spp. animals. We were unable to detect a sex-based difference in the richness (P=0.22), Shannon diversity (P=0.18), phylogenetic diversity (P=0.07), or community structure (AMOVA; P~θ~=0.27; P~W~=0.34) of the _Peromyscus_ spp. microbiota. To investigate possible sex-based differences further, we focused on sexually mature adult males and females, which had descended testes and emerged nipples, respectively; however, we were unable to identify a sex-based effect on the richness (P=0.12), Shannon diversity (P=0.11), phylogenetic diversity (P=0.21), or community structure (AMOVA; P~θ~=0.43; P~W~=0.83). Furthermore, none of the OTUs that appeared in at least half of the samples were differentially enriched in either sex. Stratification of the mice into the age categories of juvenile (N=30), adolescent (N=30), and adult (N=51) did reveal small, but significant differences in the richness (P=0.04) and diversity (P=0.03) between the cohorts but not their phylogenetic diversity (P=0.18; Figure 4A). The overall trend was for older mice to have a more rich and complex community relative. This was paralleled by a modest correlation between the animals’ weight and their Shannon diversity (Spearman’s rho=0.31, P=0; Figure 4B). Although there did appear to be some effect of age on the richness and diversity of the communities, it was difficult to ascribe much biological significance to these differences considering the differences in overall community structure were not significantly different from each other (AMOVA; P~θ~=0.37; P~W~=0.4) and there were no OTUs that were differentially abundant between the three age categories. Overall, by the parameters we were able to measure, we were unable to detect a robust effect of host physiology on their microbiota.
+We next tested how differences in sex, reproductive condition, and age affected the gut microbiota of the *Peromyscus* spp. animals. We were unable to detect a sex-based difference in the richness (P=0.22), Shannon diversity (P=0.18), phylogenetic diversity (P=0.07), or community structure (AMOVA; P~θ~=0.27; P~W~=0.33) of the _Peromyscus_ spp. microbiota. To investigate possible sex-based differences further, we focused on sexually mature adult males and females, which had descended testes and emerged nipples, respectively; however, we were unable to identify a sex-based effect on the richness (P=0.12), Shannon diversity (P=0.11), phylogenetic diversity (P=0.21), or community structure (AMOVA; P~θ~=0.43; P~W~=0.83). Furthermore, none of the OTUs that appeared in at least half of the samples were differentially enriched in either sex. Stratification of the mice into the age categories of juvenile (N=30), adolescent (N=30), and adult (N=51) did reveal small, but significant differences in the richness (P=0.04) and diversity (P=0.03) between the cohorts but not their phylogenetic diversity (P=0.18; Figure 4A). The overall trend was for older mice to have a more rich and complex community relative. This was paralleled by a modest correlation between the animals’ weight and their Shannon diversity (Spearman’s rho=0.31, P=0; Figure 4B). Although there did appear to be some effect of age on the richness and diversity of the communities, it was difficult to ascribe much biological significance to these differences considering the differences in overall community structure were not significantly different from each other (AMOVA; P~θ~=0.37; P~W~=0.4) and there were no OTUs that were differentially abundant between the three age categories. Overall, by the parameters we were able to measure, we were unable to detect a robust effect of host physiology on their microbiota.
 
 ### Location of sampling was not associated with variation in microbiota
 
