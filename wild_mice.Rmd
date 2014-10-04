@@ -36,8 +36,8 @@ knit2html("wild_mice.Rmd")
 
 I have used the following knitr settings to compile this document:
 
-```{r knitr.settings, eval=TRUE, echo=TRUE}
-opts_chunk$set("fig.path" = "figures/")
+```{r knitr.settings, eval=TRUE, echo=TRUE, cache=FALSE}
+opts_chunk$set("fig.path"="figure/")
 opts_chunk$set("fig.align"="center")
 opts_chunk$set("dev" = "pdf")
 
