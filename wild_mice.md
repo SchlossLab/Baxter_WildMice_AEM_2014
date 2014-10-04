@@ -561,9 +561,9 @@ thetayc.adonis
 ## Terms added sequentially (first to last)
 ## 
 ##               Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)
-## md$SP          1     0.792 0.79228  2.1854 0.01938 0.2755
-## md$Sex         1     0.582 0.58234  1.6063 0.01424 0.2743
-## md$SP:md$Sex   1     0.716 0.71619  1.9755 0.01752 0.4128
+## md$SP          1     0.792 0.79228  2.1854 0.01938 0.2598
+## md$Sex         1     0.582 0.58234  1.6063 0.01424 0.2705
+## md$SP:md$Sex   1     0.716 0.71619  1.9755 0.01752 0.3943
 ## Residuals    107    38.791 0.36253         0.94886       
 ## Total        110    40.882                 1.00000
 ```
@@ -589,9 +589,9 @@ weighted.adonis
 ## Terms added sequentially (first to last)
 ## 
 ##               Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)
-## md$SP          1    0.3051 0.305097  4.1474 0.03626 0.3357
-## md$Sex         1    0.1083 0.108284  1.4720 0.01287 0.3342
-## md$SP:md$Sex   1    0.1292 0.129192  1.7562 0.01535 0.2663
+## md$SP          1    0.3051 0.305097  4.1474 0.03626 0.3403
+## md$Sex         1    0.1083 0.108284  1.4720 0.01287 0.3394
+## md$SP:md$Sex   1    0.1292 0.129192  1.7562 0.01535 0.2732
 ## Residuals    107    7.8712 0.073563         0.93551       
 ## Total        110    8.4138                  1.00000
 ```
@@ -609,7 +609,7 @@ dmm.fit <- read.table(file = "16S.analysis/wild_mice.16S.trim.contigs.unique.goo
     header = T)
 n.dmms <- which.min(dmm.fit$Laplace)
 ```
-We compared the fecal communities between the two host species to test whether the genetic differences between the two animal species would translate into differences in their microbiotas. Using a variety of statistical tests, we were unable to detect a meaningful difference between the two species. First, there was not a significant difference in the richness (P=0.47), Shannon diversity (P=0.57), or phylogenetic diversity (P=0.86) between the two species of mice (Figure 2A). Second, there was not a significant difference in the community structures of the microbiota characterized from the two species (AMOVA; P~θ~=0.28; P~W~=0.34). Third, there was not a significant difference in the variation of their community structure within the microbiota characterized from the two species (HOMOVA; P~θ~=0.38; P~W~=0.16). Finally, when we attempted to fit the OTU abundance data to DMM models, there was no support for more than one (1) community type. In each of these comparisons, the level of variation across mice within either species was considerable (Figure 2B).
+We compared the fecal communities between the two host species to test whether the genetic differences between the two animal species would translate into differences in their microbiotas. Using a variety of statistical tests, we were unable to detect a meaningful difference between the two species. First, there was not a significant difference in the richness (P=0.47), Shannon diversity (P=0.57), or phylogenetic diversity (P=0.86) between the two species of mice (Figure 2A). Second, there was not a significant difference in the community structures of the microbiota characterized from the two species (AMOVA; P~θ~=0.26; P~W~=0.34). Third, there was not a significant difference in the variation of their community structure within the microbiota characterized from the two species (HOMOVA; P~θ~=0.38; P~W~=0.16). Finally, when we attempted to fit the OTU abundance data to DMM models, there was no support for more than one (1) community type. In each of these comparisons, the level of variation across mice within either species was considerable (Figure 2B).
 
 
 ```r
@@ -711,7 +711,7 @@ pmg.pd <- aggregate(pd.final[md$SP=="PMG"], by=list(md$ET[md$SP=="PMG"]), median
 med.pl <- median(pd.final)
 med.pmg <- median(pd.final)
 
-par(mar=c(8, 5, 0.5, 0.5))
+par(mar=c(12, 5, 0.5, 0.5))
 stripchart(at=0.25, pl.pd, vertical=T, method="jitter", ylim=c(0,18), ylab="Phylogenetic\ndiversity", xlab="", xaxt="n",  yaxt="n", bg="white", pch=21, xlim=c(0,1))
 stripchart(at=0.75, pmg.pd, vertical=T, method="jitter", xlab="", xaxt="n", yaxt="n", bg="black", pch=21, add=T)
 
@@ -768,7 +768,7 @@ for(et in pmg.et){
 	between[et] <- median(unlist(weighted[md$ET==et, md$SP!="PMG"]))
 }
 
-par(mar=c(8, 5, 0.5, 0.5))
+par(mar=c(12, 5, 0.5, 0.5))
 stripchart(at=1, pl, vertical=T, method="jitter", jitter=0.3, xlim=c(0.5,3.5), ylim=c(0,1.0), yaxt="n", pch=21, bg="white", ylab="Median weighted\nUniFrac distance")
 stripchart(at=2, pmg, vertical=T, method="jitter", jitter=0.3, add=T, pch=19, col="black")
 stripchart(at=3, between, vertical=T, method="jitter", jitter=0.3, add=T, pch=19, col="gray")
@@ -793,7 +793,7 @@ third <- aggregate(otu.subsampled[,most.imp.otus[3]]/nseqs, by=list(md$SP, md$ET
 third.pl <- third[third$Group.1=="PL", "x"]
 third.pmg <- third[third$Group.1=="PMG", "x"]
 third.med <- median(third$x)
-par(mar=c(8, 5, 0.5, 0.5))
+par(mar=c(12, 5, 0.5, 0.5))
 
 plot(1, xlim=c(0, 1.5), ylim=c(0,0.015), type="n", xaxt="n", yaxt="n", xlab="", ylab="Relative abundance (%)")
 
@@ -820,7 +820,7 @@ axis(2, at=seq(0,0.025, 0.005), label=format(seq(0,2.5, 0.5), digits=1), las=1)
 mtext(side=2, at=0.0152, line=2.5, cex=1.25, las=1, font=2, text="C")
 ```
 
-<img src="figures/figure2.pdf" title="plot of chunk figure2" alt="plot of chunk figure2" style="display: block; margin: auto;" />
+<img src="figures/figure2-1.pdf" title="plot of chunk figure2" alt="plot of chunk figure2" style="display: block; margin: auto;" />
 
 We observed one (1) OTU that was significantly different between the two species. This OTU affiliated among the unclassified members of the family _Porphyromonadaceae_ (Figure 2C). Furthermore, among all of the OTUs, this OTU provided the greatest mean decrease in accuracy (MDA=22) when we used the random forest machine-learning algorithm to distinguish between the _Peromyscus_ species. The next two OTUs which resulted in the greated mean decrease in accuracy were an OTU associated with the _Prevotella_ and _Clostridia_ (MDA=17.7 and 17.6, respectively). For the random forest feature selection procedure, we observed an out of bag error rate of 35.1% suggesting that it was not possible to reliably use these OTUs to correctly classify the communities found in the two species of mice. Thus there was a lack of clear support for a differentiation in specific members of the _Peromyscus_ species’ microbiotas that parallels that of their host species.
 
@@ -964,9 +964,9 @@ axis(2, at = seq(length(phylo.mc.medians):1), label = gsub("_", " ", phylo.taxa[
 text(x = 0.8, y = length(phylo.mc.medians), label = "B", cex = 2, font = 2)
 ```
 
-<img src="figures/figure3.pdf" title="plot of chunk figure3" alt="plot of chunk figure3" style="display: block; margin: auto;" />
+<img src="figures/figure3-1.pdf" title="plot of chunk figure3" alt="plot of chunk figure3" style="display: block; margin: auto;" />
 
-One striking feature of the communities observed between the mice was the large amount of variation in the composition of their gut microbiota. We observed a total of 3040 OTUs among all of the mice; however, the median number of OTUs observed in each mouse was 272 (95% confidence interval=113.75-372.5). Across all of the OTUs, 6 OTUs were present in every sample, but 23 were observed in at least 90% of the mice (Figure 3A). The latter set of OTUs affiliated with 10 different taxa and represented 31.6% of all of the 16S rRNA gene sequences sampled from the mice (Figure 3A). These OTUs did not overlap with the two OTUs that were identified as being significantly different between the two species of mice (N=0). We next considered the taxonomic diversity of bacterial genera. Among the 349 genera that were observed, 23 were observed in at least 90% of the mice and 13 were observed in every mouse sampled (Figure 3B). Those genera found in at least 90% of the mice represented 87.5% of all sequences sampled and those found in every animal represented 79.8% of all sequences sampled. Within each animal we identified the dominant genus and observed that _Lachnospiraceae_ was the dominant genus in 34.7% of the mice followed by _Porphyromonadaceae_ (28.6%) and _Lactobacillus_ (26.5%). These results demonstrate that among the _Peromyscus_ spp. animals that we sampled, there was a conserved taxonomic core.
+One striking feature of the *Peromyscus* spp. microbial communities was the large amount of variation in the composition of their gut microbiota. We observed a total of 3040 OTUs among all of the mice; however, the median number of OTUs observed in each mouse was 272 (95% confidence interval=113.75-372.5). Across all of the OTUs, 6 OTUs were present in every sample, but 23 were observed in at least 90% of the mice (Figure 3A). The latter set of OTUs affiliated with 10 different taxa and represented 31.6% of all of the 16S rRNA gene sequences sampled from the mice (Figure 3A). These OTUs did not overlap with the OTU that was identified as being significantly different between the two species of mice.  (N=0). We next considered the taxonomic diversity of bacterial genera. Among the 349 genera that were observed, 23 were observed in at least 90% of the mice and 13 were observed in every mouse sampled (Figure 3B). Those genera found in at least 90% of the mice represented 87.5% of all sequences sampled and those found in every animal represented 79.8% of all sequences sampled. Within each animal we identified the dominant genus and observed that _Lachnospiraceae_ was the dominant genus in 34.7% of the mice followed by _Porphyromonadaceae_ (28.6%) and _Lactobacillus_ (26.5%). These results demonstrate that although there was considerable variation among the Peromyscus spp. animals that we sampled, there was a conserved taxonomic core.
 
 
 ### Effects of host physiology on diversity and richness
@@ -1059,9 +1059,9 @@ sm.sex.thetayc
 ## Terms added sequentially (first to last)
 ## 
 ##                   Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)
-## md.sex.mature$Sex  1    0.3613 0.36128  1.0114 0.02151 0.4212
-## Residuals         46   16.4317 0.35721         0.97849       
-## Total             47   16.7929                 1.00000
+## md.sex.mature$Sex  1    0.3583 0.35832  1.0021 0.02132 0.4313
+## Residuals         46   16.4490 0.35759         0.97868       
+## Total             47   16.8073                 1.00000
 ```
 
 ```r
@@ -1084,9 +1084,9 @@ sm.sex.weighted
 ## Terms added sequentially (first to last)
 ## 
 ##                   Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)
-## md.sex.mature$Sex  1    0.0482 0.048218  0.6551 0.01404 0.8277
-## Residuals         46    3.3858 0.073604         0.98596       
-## Total             47    3.4340                  1.00000
+## md.sex.mature$Sex  1    0.0479 0.047942 0.65101 0.01395 0.8317
+## Residuals         46    3.3875 0.073642         0.98605       
+## Total             47    3.4355                  1.00000
 ```
 
 ```r
@@ -1194,9 +1194,9 @@ age.thetayc
 ## Terms added sequentially (first to last)
 ## 
 ##            Df SumsOfSqs   MeanSqs F.Model      R2 Pr(>F)
-## md$Age      2   0.00897 0.0044837   1.094 0.01986 0.3903
-## Residuals 108   0.44262 0.0040984         0.98014       
-## Total     110   0.45159                   1.00000
+## md$Age      2   0.00903 0.0045163  1.1044 0.02004 0.3725
+## Residuals 108   0.44167 0.0040895         0.97996       
+## Total     110   0.45070                   1.00000
 ```
 
 ```r
@@ -1216,9 +1216,9 @@ age.weighted
 ## Terms added sequentially (first to last)
 ## 
 ##            Df SumsOfSqs   MeanSqs F.Model      R2 Pr(>F)
-## md$Age      2   0.01678 0.0083904  1.0467 0.01902 0.4211
-## Residuals 108   0.86569 0.0080157         0.98098       
-## Total     110   0.88247                   1.00000
+## md$Age      2   0.01695 0.0084736  1.0656 0.01935 0.4009
+## Residuals 108   0.85880 0.0079518         0.98065       
+## Total     110   0.87574                   1.00000
 ```
 
 ```r
@@ -1332,7 +1332,7 @@ legend(x = 15, y = 0.75, legend = c("P. leucopus", "P. maniculatus gracilis"),
 
 <img src="figures/figure4.pdf" title="plot of chunk figure4" alt="plot of chunk figure4" style="display: block; margin: auto;" />
 
-We next tested how differences in sex, reproductive condition, and age affected the gut microbiota of _Peromyscus_. We were unable to detect a sex-based difference in the richness (P=0.22), Shannon diversity (P=0.18), phylogenetic diversity (P=0.07), or community structure (AMOVA; P~θ~=0.27; P~W~=0.33) of the _Peromyscus_ spp. microbiota. To investigate possible sex-based differences further, we focused on sexually mature adult males and females, which had descended testes and emerged nipples, respectively; however, we were unable to identify a sex-based effect on the richness (P=0.12), Shannon diversity (P=0.11), phylogenetic diversity (P=0.21), or community structure (AMOVA; P~θ~=0.42; P~W~=0.83). Furthermore, none of the OTUs that appeared in at least half of the samples were differentially enriched in either sex. Stratification of the mice into the age categories of juvenile (N=30), adolescent (N=30), and adult (N=51) did reveal small, but significant differences in the richness (P=0.04) and diversity (P=0.03) between the cohorts but not their phylogenetic diversity (P=0.18; Figure 4A). The overall trend was for older mice to have a more rich and complex community relative. This was paralleled by a modest correlation between the animals’ weight and their Shannon diversity (Spearman’s rho=0.31, P=0; Figure 4B). Although there did appear to be some effect of age on the richness and diversity of the communities, it was difficult to ascribe much biological significance to these differences considering the differences in overall community structure were not significantly different from each other (AMOVA; P~θ~=0.39; P~W~=0.42) and there were no OTUs that were differentially abundant between the three age categories. Overall, by the parameters we were able to measure, we were unable to detect a robust effect of host physiology on their microbiota.
+We next tested how differences in sex, reproductive condition, and age affected the gut microbiota of the *Peromyscus* spp. animals. We were unable to detect a sex-based difference in the richness (P=0.22), Shannon diversity (P=0.18), phylogenetic diversity (P=0.07), or community structure (AMOVA; P~θ~=0.27; P~W~=0.34) of the _Peromyscus_ spp. microbiota. To investigate possible sex-based differences further, we focused on sexually mature adult males and females, which had descended testes and emerged nipples, respectively; however, we were unable to identify a sex-based effect on the richness (P=0.12), Shannon diversity (P=0.11), phylogenetic diversity (P=0.21), or community structure (AMOVA; P~θ~=0.43; P~W~=0.83). Furthermore, none of the OTUs that appeared in at least half of the samples were differentially enriched in either sex. Stratification of the mice into the age categories of juvenile (N=30), adolescent (N=30), and adult (N=51) did reveal small, but significant differences in the richness (P=0.04) and diversity (P=0.03) between the cohorts but not their phylogenetic diversity (P=0.18; Figure 4A). The overall trend was for older mice to have a more rich and complex community relative. This was paralleled by a modest correlation between the animals’ weight and their Shannon diversity (Spearman’s rho=0.31, P=0; Figure 4B). Although there did appear to be some effect of age on the richness and diversity of the communities, it was difficult to ascribe much biological significance to these differences considering the differences in overall community structure were not significantly different from each other (AMOVA; P~θ~=0.37; P~W~=0.4) and there were no OTUs that were differentially abundant between the three age categories. Overall, by the parameters we were able to measure, we were unable to detect a robust effect of host physiology on their microbiota.
 
 ### Location of sampling was not associated with variation in microbiota
 
@@ -1351,12 +1351,12 @@ location.thetayc
 ## Call:
 ## mantel(xdis = thetayc, ydis = distance.matrix, method = "spearman",      permutations = perm) 
 ## 
-## Mantel statistic r: -0.03371 
-##       Significance: 0.92181 
+## Mantel statistic r: -0.03392 
+##       Significance: 0.92501 
 ## 
 ## Upper quantiles of permutations (null model):
 ##    90%    95%  97.5%    99% 
-## 0.0315 0.0411 0.0499 0.0583 
+## 0.0316 0.0412 0.0497 0.0586 
 ## 
 ## Based on 10000 permutations
 ```
@@ -1376,12 +1376,12 @@ location.weighted
 ## Call:
 ## mantel(xdis = weighted, ydis = distance.matrix, method = "spearman",      permutations = perm) 
 ## 
-## Mantel statistic r: -0.02314 
-##       Significance: 0.81252 
+## Mantel statistic r: -0.02317 
+##       Significance: 0.81372 
 ## 
 ## Upper quantiles of permutations (null model):
 ##    90%    95%  97.5%    99% 
-## 0.0337 0.0432 0.0507 0.0622 
+## 0.0337 0.0431 0.0509 0.0621 
 ## 
 ## Based on 10000 permutations
 ```
@@ -1423,7 +1423,7 @@ weighted.inter_intra.wilcox <- wilcox.test(weighted.inter_intra$intra, weighted.
 # W = 117469.5, p-value = 0.9406
 ```
 
-Next, we hypothesized that animals collected from the same environment would be more likely to share a similar microbiota than animals collected from different environments. For this analysis, we used the sampling coordinates to define the animals’ environment (Figure 1). When we performed a Mantel test to test for the association between the distance between the sampling points and the β-diversity between the gut microbiotas, we failed to detect a significant association (M~θ~=-0.03, P~θ~=0.92; M~W~=-0.02, P~W~=0.81; 10<sup>4</sup> permutations). To test for a more localized habitat effect we compared the distances collected at the same site to those collected at different sites and again failed to detect a meaningful effect (Wilcoxon-test, P~θ~=0.67; P~W~=0.96). These results suggest the lack of a geographic or habitat-based effect on the _Peromyscus_ spp. microbiota.
+Next, we hypothesized that animals collected from the same environment would be more likely to share a similar microbiota than animals collected from different environments. For this analysis, we used the sampling coordinates to define the animals’ environment (Figure 1). When we performed a Mantel test to test for the association between the distance between the sampling points and the β-diversity between the gut microbiotas, we failed to detect a significant association (M~θ~=-0.03, P~θ~=0.93; M~W~=-0.02, P~W~=0.81; 10<sup>4</sup> permutations). To test for a more localized habitat effect we compared the distances collected at the same site to those collected at different sites and again failed to detect a meaningful effect (Wilcoxon-test, P~θ~=0.7; P~W~=0.95). These results suggest the lack of a geographic or habitat-based effect on the _Peromyscus_ spp. microbiota.
 
 ### Diet was not associated with variation in microbiota
 
@@ -1474,12 +1474,12 @@ theta.food.mantel
 ## Call:
 ## mantel(xdis = theta.food, ydis = food, method = "spearman", permutations = perm) 
 ## 
-## Mantel statistic r: 0.09362 
-##       Significance: 0.071593 
+## Mantel statistic r: 0.09822 
+##       Significance: 0.062894 
 ## 
 ## Upper quantiles of permutations (null model):
 ##    90%    95%  97.5%    99% 
-## 0.0807 0.1052 0.1256 0.1499 
+## 0.0807 0.1051 0.1258 0.1516 
 ## 
 ## Based on 10000 permutations
 ```
@@ -1500,12 +1500,12 @@ weighted.food.mantel
 ## Call:
 ## mantel(xdis = weighted.food, ydis = food, method = "spearman",      permutations = perm) 
 ## 
-## Mantel statistic r: 0.09195 
-##       Significance: 0.091691 
+## Mantel statistic r: 0.089 
+##       Significance: 0.09629 
 ## 
 ## Upper quantiles of permutations (null model):
 ##    90%    95%  97.5%    99% 
-## 0.0873 0.1151 0.1367 0.1630 
+## 0.0869 0.1145 0.1369 0.1615 
 ## 
 ## Based on 10000 permutations
 ```
@@ -1514,7 +1514,7 @@ weighted.food.mantel
 # Mantel statistic r: 0.09022 Significance: 0.094391
 ```
 
-To test the role of diet in shaping the _Peromyscus_ species gut microbiota, we characterized the dietary contents of each PL and PMG sample using 18S rRNA sequencing. The diets of PL and PMG consisted of plant material (e.g. seeds, nuts, fruits, and green vegetation), arthropods, and fungi. Our 18S rRNA gene sequencing data confirmed previous results (26). We removed sequences outside of these broad taxonomic groups to minimize the contributions of microeukaryotic members of the gut microbiota. First, we tested for a difference in diet composition based on _Peromyscus_ species. We failed to find a significant difference in the structure of the diets when using AMOVA with correction for repeated measures (P>0.99). Second, using the Mantel test we failed to identify a significant association between the distances between samples based on their bacterial community structure and the distances based on the structure of their diet (M~θ~=0.09, P~θ~=0.07; M~W~=0.09, P~W~=0.09; 10<sup>4</sup> permutations). Both analyses suggest the lack of an association between the structures of the diet and microbiota.
+To test the role of diet in shaping the _Peromyscus_ species gut microbiota, we characterized the dietary contents of each PL and PMG sample using 18S rRNA sequencing. The diets of PL and PMG consisted of plant material (e.g. seeds, nuts, fruits, and green vegetation), arthropods, and fungi, which was consistent with previous results (26). We removed sequences outside of these broad taxonomic groups to minimize the contributions of microeukaryotic members of the gut microbiota.  First, we tested for a difference in diet composition based on the two species of *Peromyscus*. We failed to find a significant difference in the structure of the diets when using AMOVA with correction for repeated measures (P>0.99). Second, using the Mantel test we failed to identify a significant association between the distances between samples based on their bacterial community structure and the distances based on the structure of their diet (M~θ~=0.1, P~θ~=0.06; M~W~=0.09, P~W~=0.1; 10<sup>4</sup> permutations). Both analyses suggest the lack of an association between the structures of the diet and microbiota.
 
 
 ```r
@@ -1583,7 +1583,7 @@ confusion <- data.rf$confusion[, 1:2]
 oob.error <- (confusion[1, 2] + confusion[2, 1])/sum(confusion) * 100
 ```
 
-To further characterize the relationship between diet and the microbiota, we attempted to correlate the relative abundance of OTUs that were found in more than half of the samples with the relative abundance of dietary components that appeared in more than half of the samples. We were unable to detect any statistically significant Spearman correlation coefficients (N=0). Next, we used DMM models to identify clusters within the diet data. This approach identified two clusters (N=36, 51), which included a cluster of samples dominated by plant material (n=50) and a cluster of samples with a more diverse mixture of plants, arthropods, and fungi (n=37). When we used these clusters to test for an association within the community structure distance matrix between the microbiotas of the mice, we did not observe a significant effect of diet on community structure (AMOVA; P~θ~=0.51; P~W~=0.09). We then used the random forest algorithm to identify features in the microbiota that could distinguish the two dietary groups; however, the out of bag error rate was 39.1%, which indicates that it was unable to correctly classify the samples. As these analyses demonstrate, we were unable to find associations between specific members of the microbiota and the dietary contents of each sample. This confirms our observation that the weak association between the distances between the microbiota and diet structures was unlikely to be biologically relevant.
+To further characterize the relationship between diet and the microbiota, we attempted to correlate the relative abundance of OTUs that were found in more than half of the samples with the relative abundance of dietary components that appeared in more than half of the samples. We were unable to detect any statistically significant Spearman correlation coefficients (N=0). Next, we used DMM models to identify clusters within the diet data. This approach identified two clusters (N=36, 51), which included a cluster of samples dominated by plant material (n=50) and a cluster of samples with a more diverse mixture of plants, arthropods, and fungi (n=37). When we used these clusters to test for an association within the community structure distance matrix between the microbiotas of the mice, we did not observe a significant effect of diet on community structure (AMOVA; P~θ~=0.48; P~W~=0.1). We then used the random forest algorithm to identify features in the microbiota that could distinguish the two dietary groups; however, the out of bag error rate was 39.1%, which indicates that it was unable to correctly classify the samples. As these analyses demonstrate, we were unable to find associations between specific members of the microbiota and the dietary contents of each sample. This confirms our observation that the weak association between the distances between the microbiota and diet structures was unlikely to be biologically relevant.
 
 ### A transient microbiota
 
@@ -1767,7 +1767,7 @@ mtext(side = 2, at = 1, line = 3, text = "B", las = 1, font = 2, cex = 2)
 
 <img src="figures/figure5-1.pdf" title="Figure 5. Something clever" alt="Figure 5. Something clever" style="display: block; margin: auto;" />
 
-A striking characteristic of the microbiotas characterized in this study was the high intra- and inter-individual variation. Studies in other animals have observed less variation in microbiota structure within an individual over time than between individuals. We sought to determine whether non-domesticated animals also harbored personalized microbiotas. To investigate this in _Peromyscus_ spp. we took advantage of the ability to catch and release the same animal multiple times. Using the OTU-based approach the median intra-individual distance was significantly less than the median inter-individual distance (Wilcoxon paired test; P~θ~=0.004); however, using the weighted UniFrac-based approach the difference was not significant (P~W~=0.19). Within the OTU-based analysis, there was wide variation in the intra-animal distances and the difference in the median intra- and inter-animal distances was small (difference=0.05; Figure 5A). To investigate this further, we calculated the number of days that elapsed between recapturing events and created five time-windows such that each window had approximately the same number of mice that were recaptured within that time period (i.e. 1-3 [N=30], 4-11 [N=22], 12-14 [N=24], 15-19 [N=21], and >=20 days [N=24] apart). We then compared the intra-animal distances within these time periods to the inter-animal distances of different mice captured within the same intervals. Surprisingly, only the mice captured between 1 and 3 days apart were more similar to themselves than to other mice (Figure 5B; Wilcoxon Test; P=0.001). In none of the other time windows was there a significant difference between samples collected from the same animal and the samples collected from different animals (all P>0.06). These results suggest that any individualization of an animal’s microbiota is quickly lost.
+A striking characteristic of the microbiotas characterized in this study was the high intra- and inter-individual variation. Studies in other animals have observed less variation in microbiota structure within an individual over time than between individuals. We sought to determine whether non-domesticated animals also harbored personalized microbiotas. To investigate this in _Peromyscus_ spp. we took advantage of the ability to catch and release the same animal multiple times. Using the OTU-based approach the median intra-individual distance was significantly less than the median inter-individual distance (Wilcoxon paired test; P~θ~=0.004); however, using the weighted UniFrac-based approach the difference was not significant (P~W~=0.19; Figure 5A). To investigate this further, we calculated the number of days that elapsed between recapturing events and created five time-windows such that each window had approximately the same number of mice that were recaptured within that time period (i.e. 1-3 [N=30], 4-11 [N=22], 12-14 [N=24], 15-19 [N=21], and >=20 days [N=24] apart). We then compared the intra-animal distances within these time periods to the inter-animal distances of different mice captured within the same intervals. Surprisingly, only the mice captured between 1 and 3 days apart were more similar to themselves than to other mice (Figure 5B; Wilcoxon Test; P=0.001). In none of the other time windows was there a significant difference between samples collected from the same animal and the samples collected from different animals (all P>0.06). These results suggest that any individualization of an animal’s microbiota is quickly lost.
 
 ## Conclusion
 We hope that you have found the code behind our analysis to be useful as you ponder our results and perhaps consider your own analysis. Please do not hesitate to contact Pat Schloss (pschloss@umich.edu) should you have any questions or concerns.
