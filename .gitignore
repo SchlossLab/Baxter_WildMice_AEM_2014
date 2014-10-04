@@ -3,7 +3,6 @@
 *.dist
 mothur*logfile
 *.analysis/
-figures/
 *.log
 
 #R files
@@ -12,5 +11,3 @@ figures/
 .RData
 .Rhistory
 
-#output files
-*.html
