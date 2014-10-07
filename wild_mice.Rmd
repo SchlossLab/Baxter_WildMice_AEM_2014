@@ -547,7 +547,7 @@ pmg.pd <- aggregate(pd.final[md$SP=="PMG"], by=list(md$ET[md$SP=="PMG"]), median
 med.pl <- median(pd.final)
 med.pmg <- median(pd.final)
 
-par(mar=c(13.5, 5, 0.5, 0.5))
+par(mar=c(13.7, 5, 0.5, 0.5))
 stripchart(at=0.25, pl.pd, vertical=T, method="jitter", ylim=c(0,18), ylab="Phylogenetic\ndiversity", xlab="", xaxt="n",  yaxt="n", bg="white", pch=21, xlim=c(0,1))
 stripchart(at=0.75, pmg.pd, vertical=T, method="jitter", xlab="", xaxt="n", yaxt="n", bg="black", pch=21, add=T)
 
@@ -604,7 +604,7 @@ for(et in pmg.et){
 	between[et] <- median(unlist(weighted[md$ET==et, md$SP!="PMG"]))
 }
 
-par(mar=c(13.5, 5, 0.5, 0.5))
+par(mar=c(13.7, 5, 0.5, 0.5))
 stripchart(at=1, pl, vertical=T, method="jitter", jitter=0.3, xlim=c(0.5,3.5), ylim=c(0,1.0), yaxt="n", pch=21, bg="white", ylab="Median weighted\nUniFrac distance")
 stripchart(at=2, pmg, vertical=T, method="jitter", jitter=0.3, add=T, pch=19, col="black")
 stripchart(at=3, between, vertical=T, method="jitter", jitter=0.3, add=T, pch=19, col="gray")
@@ -629,7 +629,7 @@ third <- aggregate(otu.subsampled[,most.imp.otus[3]]/nseqs, by=list(md$SP, md$ET
 third.pl <- third[third$Group.1=="PL", "x"]
 third.pmg <- third[third$Group.1=="PMG", "x"]
 third.med <- median(third$x)
-par(mar=c(13.5, 5, 0.5, 0.5))
+par(mar=c(13.7, 5, 0.5, 0.5))
 
 plot(1, xlim=c(0, 1.5), ylim=c(0,0.015), type="n", xaxt="n", yaxt="n", xlab="", ylab="Relative abundance (%)")
 
