@@ -39,7 +39,7 @@ I have used the following knitr settings to compile this document:
 ```{r knitr.settings, eval=TRUE, echo=TRUE, cache=FALSE}
 opts_chunk$set("fig.path"="figure/")
 opts_chunk$set("fig.align"="center")
-opts_chunk$set("dev" = "pdf")
+opts_chunk$set("dev" = c("png", "pdf")
 
 opts_chunk$set("tidy" = TRUE)
 
@@ -506,7 +506,7 @@ most.imp.mda <- imp[most.imp.otus, "MeanDecreaseAccuracy"]
 
 ```
 
-```{r figure2, height=4, width=7.5}
+```{r figure2, fig.height=4, fig.width=7.5}
 l <- layout(matrix(c(	1,4,6,
 						2,4,6,
 						2,5,6,
