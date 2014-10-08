@@ -7,7 +7,8 @@ output: html_document
 
 ---
 
-# Intra- and inter-individual variation masks inter-species variation in the microbiota of sympatric _Peromyscus_ populations
+# Intra- and inter-individual variation masks inter-species variation in the microbiota of sympatric _Peromyscus_ populations  
+Nielson T. Baxter, Judy J. Wan, Alyxandria M. Schubert, Matthew L. Jenior, Philip Myers, and Patrick D. Schloss
 
 ## Introduction
 This is a digital notebook to accompany the paper titled, "Intra- and inter-individual variation masks inter-species variation in the microbiota of sympatric _Peromyscus_ populations" that will be published in *Applied & Environmental Microbiology*. It was written in [R markdown](http://rmarkdown.rstudio.com) and converted to html using the R knitr package. This enables us to embed the results of our analyses directly into the text to allow for a completely reproducible data analysis pipeline. A [github repository is available](https://github.com/schlossLab/wild_mice) where you can pull down your own version of the notebook to modify our analysis or adapt it to your analysis. 
@@ -315,7 +316,7 @@ for(et in dup.et){
 
 Between `r start` and `r end`, 2010 we used live traps to capture and release PL and PMG from sites within a 400 m by 400 m grid (20 m intervals) within Pigeon River State Forest in Cheboygan County, MI. Because animals were given ear tags at the initial capture event, we were able to document the animals that were captured multiple times. We obtained `r sum(samples.per.species["PL"])` fecal samples from `r indiv.per.species["PL"]` PL animals and `r sum(samples.per.species["PMG"])` fecal samples from `r sum(indiv.per.species["PMG"])` PMG animals. Among the samples from animals captured multiple times (N=`r indiv.multiple` animals), the median distance between successive re-sampling events was `r round(median(dist.travel), digits=0)` m (minimum=`r round(min(dist.travel), digits=0)` m, maximum=`r round(max(dist.travel), digits=0)` m). When we overlaid the species of _Peromyscus_ on the sampling grid, we were unable to detect variation in the range of the mice supporting the notion that the habitats of these mice overlapped (Figures 1A and 1B).
 
-````{r figure1A, dev="png"}
+````{r figure1A}
 #the PL grid
 pl_grid <- matrix(rep(0, 20*20), nrow=20)
 rownames(pl_grid) <- 1:20
@@ -340,7 +341,7 @@ gray <- gray.colors(max(c(pl_grid, pmg_grid))+1, 1, 0)
 heatmap(t(pl_grid), col=gray, scale="n", Rowv=NA, Colv=NA, symm=T, revC=T, labRow=names(north_south), margins=c(10, 6))
 ```
 
-```{r figure1B, dev="png"}
+```{r figure1B}
 heatmap(t(pmg_grid), col=gray, scale="n", Rowv=NA, Colv=NA, symm=T, revC=T, labRow=names(north_south), margins=c(10, 6))
 
 ch.col <- gray
@@ -508,7 +509,7 @@ most.imp.mda <- imp[most.imp.otus, "MeanDecreaseAccuracy"]
 
 ```
 
-```{r figure2, height=4, width=7.5, dev="png"}
+```{r figure2, height=4, width=7.5}
 l <- layout(matrix(c(	1,4,6,
 						2,4,6,
 						2,5,6,
@@ -732,7 +733,7 @@ percent.dominant <- 100*sort(table(dominant.phylo), decreasing=T)/length(dominan
 names.dominant <- phylo.taxa[names(percent.dominant)]
 ```
 
-```{r figure3, fig.width=8.5, fig.height=6.5, dev="png"}
+```{r figure3, fig.width=8.5, fig.height=6.5}
 
 #get the most commonly observed OTUs across all of the mice
 otu.freq <- sort(apply(otu.med>0, 2, sum)/nrow(otu.med), decreasing =T)[1:27]
@@ -887,7 +888,7 @@ age.weighted
 # Total     110    8.4241                 1.00000       
 ```
 
-```{r figure4, fig.width=6, fig.height=4, dev="png"}
+```{r figure4, fig.width=6, fig.height=4}
 bg.color <- c("PL" = "white", "PMG" = "black")
 
 def.par <- par(no.readonly = TRUE)
@@ -1149,7 +1150,7 @@ weighted.same_different.wilcox <- wilcox.test(weighted.same_different$same, weig
 dist.diff <- diff(unlist(lapply(thetayc.same_different, median, na.rm=T)))
 ```
 
-```{r figure5, fig.width=9, fig.height=6, fig.cap="Figure 5. Something clever", dev="png"}
+```{r figure5, fig.width=9, fig.height=6, fig.cap="Figure 5. Something clever"}
 dup.et <- names(table(md$ET)[table(md$ET) > 1])
 
 date <- gsub("(\\d*)_(\\d*)", "\\1/\\2/88", md$Date)
