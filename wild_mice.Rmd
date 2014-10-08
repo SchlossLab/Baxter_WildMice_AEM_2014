@@ -39,10 +39,10 @@ knit2html("wild_mice.Rmd")
 
 I have used the following knitr settings to compile this document:
 
-```{r knitr.settings, eval=TRUE, echo=TRUE, cache=FALSE}
+```{r knitr.settings, eval=TRUE, echo=TRUE, cache=TRUE}
 opts_chunk$set("fig.path"="figure/")
 opts_chunk$set("fig.align"="center")
-opts_chunk$set("dev" = c("png", "pdf")
+opts_chunk$set("dev" = c("png", "pdf"))
 
 opts_chunk$set("tidy" = TRUE)
 
